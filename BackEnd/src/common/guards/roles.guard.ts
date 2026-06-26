@@ -10,7 +10,7 @@ export const ROLES_KEY = 'roles';
  *
  * @example
  * @UseGuards(JwtAuthGuard, RolesGuard)
- * @Roles(RolUsuario.ADMINISTRADOR)
+ * @Roles(RolUsuario.ADMIN)
  */
 @Injectable()
 export class RolesGuard implements CanActivate {

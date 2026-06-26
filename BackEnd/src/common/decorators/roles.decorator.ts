@@ -7,6 +7,6 @@ import { ROLES_KEY } from '../guards/roles.guard';
  * Combinar siempre con JwtAuthGuard y RolesGuard.
  *
  * @example
- * @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.REPARADOR_VERIFICADO)
+ * @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR_REPARADOR)
  */
 export const Roles = (...roles: RolUsuario[]) => SetMetadata(ROLES_KEY, roles);

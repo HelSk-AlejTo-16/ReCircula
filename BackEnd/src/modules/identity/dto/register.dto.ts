@@ -1,5 +1,6 @@
-import { IsEmail, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { RolUsuario } from '../entities/usuario.entity';
 
 export class RegisterDto {
   @ApiProperty({ example: 'María García' })
@@ -15,4 +16,8 @@ export class RegisterDto {
   @IsString()
   @MinLength(8)
   password: string;
+
+  @ApiProperty({ enum: RolUsuario, example: RolUsuario.USUARIO_GENERAL })
+  @IsEnum(RolUsuario)
+  rol: RolUsuario;
 }

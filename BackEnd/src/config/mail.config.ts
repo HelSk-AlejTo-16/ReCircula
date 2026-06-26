@@ -5,8 +5,8 @@ export default registerAs('mail', () => ({
   port: parseInt(process.env.MAIL_PORT ?? '2525', 10),
 
   // 👇 Pon tus credenciales REALES aquí entre comillas, borrando el process.env
-  user: 'pega_tu_usuario_real_aqui',
-  pass: 'pega_tu_contraseña_real_aqui',
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
 
   from: process.env.MAIL_FROM ?? 'ReCircula <noreply@recircula.mx>',
   appUrl: process.env.APP_URL ?? 'http://localhost:3000',

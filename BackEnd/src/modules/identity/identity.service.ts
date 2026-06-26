@@ -48,6 +48,7 @@ export class IdentityService {
       nombre: dto.nombre,
       email: dto.email,
       passwordHash,
+      rol: dto.rol,
       emailVerificado: false,
       activo: false, // inactivo hasta verificar correo
     });
