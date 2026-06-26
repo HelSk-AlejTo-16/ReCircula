@@ -29,7 +29,13 @@ import { IdentityModule } from './modules/identity/identity.module';
     // ── TypeORM conectado a PostgreSQL (schema ya existente) ─────────────────
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => config.get('database'),
+      useFactory: (config: ConfigService) => {
+        const dbConfig = config.get('database');
+        if (!dbConfig) {
+          throw new Error('La configuración de base de datos no existe');
+        }
+        return dbConfig;
+      },
       inject: [ConfigService],
     }),
 
