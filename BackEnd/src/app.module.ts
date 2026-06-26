@@ -1,17 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
-// Config factories
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import mailConfig from './config/mail.config';
 
 // Módulos de negocio
 import { IdentityModule } from './modules/identity/identity.module';
+import { PublicationsModule } from './modules/publications/publications.module';
 
 // Los siguientes módulos se implementan en futuros sprints:
-// import { PublicationsModule }   from './modules/publications/publications.module';
 // import { TransactionsModule }   from './modules/transactions/transactions.module';
 // import { HistoryModule }        from './modules/history/history.module';
 // import { MatchmakingModule }    from './modules/matchmaking/matchmaking.module';
@@ -29,6 +27,8 @@ import { IdentityModule } from './modules/identity/identity.module';
     // ── TypeORM conectado a PostgreSQL (schema ya existente) ─────────────────
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
+      useFactory: (config: ConfigService) =>
+        config.get<TypeOrmModuleOptions>('database')!,
       useFactory: (config: ConfigService) => {
         const dbConfig = config.get('database');
         if (!dbConfig) {
@@ -41,6 +41,9 @@ import { IdentityModule } from './modules/identity/identity.module';
 
     // ── RF-01: Gestión de identidad y acceso ─────────────────────────────────
     IdentityModule,
+
+    // ── RF-02: Gestión de publicaciones y artículos ──────────────────────────
+    PublicationsModule,
   ],
 })
 export class AppModule {}

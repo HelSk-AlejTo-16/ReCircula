@@ -245,7 +245,6 @@ export class IdentityService {
   ): Promise<void> {
     const tokenHash = this.hash(token);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const decoded = this.jwt.decode(token);
 
     // 👇 Usamos notación de corchetes ['exp'] para calmar al linter

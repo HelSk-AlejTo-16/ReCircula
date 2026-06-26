@@ -53,7 +53,6 @@ export class MailService {
     try {
       const from = this.config.get<string>('mail.from');
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const info = await this.transporter.sendMail({
         from,
         to,
@@ -61,7 +60,6 @@ export class MailService {
         html,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
       const messageId = info.messageId;
 
       this.logger.log(`Correo enviado → ${to} | id: ${messageId}`);
