@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import * as express from 'express';
+import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +26,12 @@ async function bootstrap() {
 
   // ── CORS ─────────────────────────────────────────────────────────────────
   app.enableCors({ origin: process.env.CORS_ORIGIN ?? '*' });
+
+  // ── Archivos Estáticos para Subidas ───────────────────────────────────────
+  app.use(
+    '/uploads',
+    express.static(path.join(process.cwd(), 'public', 'uploads')),
+  );
 
   // ── Swagger / OpenAPI ─────────────────────────────────────────────────────
   const swaggerCfg = new DocumentBuilder()
