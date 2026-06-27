@@ -9,9 +9,9 @@ import mailConfig from './config/mail.config';
 import { IdentityModule } from './modules/identity/identity.module';
 import { PublicationsModule } from './modules/publications/publications.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { HistoryModule } from './modules/history/history.module';
 
 // Los siguientes módulos se implementan en futuros sprints:
-// import { HistoryModule }        from './modules/history/history.module';
 // import { MatchmakingModule }    from './modules/matchmaking/matchmaking.module';
 // import { ReputationModule }     from './modules/reputation/reputation.module';
 // import { NotificationsModule }  from './modules/notifications/notifications.module';
@@ -45,6 +45,9 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 
     // ── RF-04: Gestión de transacciones e intercambios ───────────────────────
     TransactionsModule,
+
+    // ── RF-05: Historial de vida del producto ────────────────────────────────
+    HistoryModule,
   ],
 })
 export class AppModule {}

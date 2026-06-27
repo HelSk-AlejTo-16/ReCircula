@@ -10,17 +10,23 @@ import {
   RefreshCw,
   MessageSquare,
 } from 'lucide-react'
+import { useAuthStore } from '../../../store/authStore'
 import './TransactionsDashboard.css'
 
-export default function TransactionsDashboard() {
+export default function TransactionsDashboard({
+  onViewPublication,
+}: {
+  onViewPublication?: (id: string) => void
+}) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received')
   const [processingId, setProcessingId] = useState<string | null>(null)
 
-  const token = localStorage.getItem('recircula_token') || ''
-  const currentUserId = '00000000-0000-0000-0000-000000000001' // Tester user ID
+  const { user, token: storeToken } = useAuthStore()
+  const token = storeToken || localStorage.getItem('rc_token') || localStorage.getItem('recircula_token') || ''
+  const currentUserId = user?.id || '00000000-0000-0000-0000-000000000001' // Tester user ID
 
   const fetchTransactions = useCallback(async () => {
     if (!token) {
@@ -218,7 +224,15 @@ export default function TransactionsDashboard() {
                       <span className="tx-mode">{getFormatModalidad(tx.modalidad)}</span>
                     </div>
 
-                    <h3 className="tx-title">
+                    <h3
+                      className="tx-title"
+                      onClick={() => {
+                        if (tx.publicacionId && onViewPublication) {
+                          onViewPublication(tx.publicacionId)
+                        }
+                      }}
+                      style={{ cursor: 'pointer', color: 'var(--primary)' }}
+                    >
                       {tx.publicacion?.titulo || 'Artículo no disponible'}
                     </h3>
 

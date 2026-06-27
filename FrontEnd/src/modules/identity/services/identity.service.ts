@@ -26,7 +26,7 @@ export interface ResetPasswordPayload {
 // ── Tipos de response ─────────────────────────────────────────────────────────
 
 export interface LoginResponse {
-  accessToken: string;
+  token: string;
   usuario: AuthUser;
 }
 

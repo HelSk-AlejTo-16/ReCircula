@@ -14,8 +14,8 @@ export function useLogin() {
     setLoading(true);
     setError(null);
     try {
-      const { accessToken, usuario } = await loginService(payload);
-      setSession(usuario, accessToken);
+      const { token, usuario } = await loginService(payload);
+      setSession(usuario, token);
 
       // Redirige según rol
       switch (usuario.rol) {
@@ -23,7 +23,7 @@ export function useLogin() {
           navigate('/admin/dashboard');
           break;
         case 'REPARADOR_VERIFICADO':
-          navigate('/reparador/perfil');
+          navigate('/');
           break;
         default:
           navigate('/');

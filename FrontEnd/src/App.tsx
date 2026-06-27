@@ -5,7 +5,8 @@ import type { FiltrosBusqueda } from './modules/publications/services/api'
 import CreatePublication from './modules/publications/pages/CreatePublication'
 import PublicationDetails from './modules/publications/pages/PublicationDetails'
 import TransactionsDashboard from './modules/publications/pages/TransactionsDashboard'
-import { Plus, Search, MapPin, RefreshCw, SlidersHorizontal, Info } from 'lucide-react'
+import { Plus, Search, MapPin, RefreshCw, SlidersHorizontal, Info, LogOut } from 'lucide-react'
+import { useAuthStore } from './store/authStore'
 import './App.css'
 
 const CATEGORIAS = [
@@ -25,6 +26,7 @@ const CATEGORIAS = [
 ]
 
 function App() {
+  const { user, clearSession } = useAuthStore()
   const [view, setView] = useState<'list' | 'create' | 'details' | 'edit' | 'tratos'>('list')
   const [activePublicationId, setActivePublicationId] = useState<string>('')
 
@@ -44,6 +46,9 @@ function App() {
   // Silent Login para desarrollo (RF-01)
   useEffect(() => {
     const fetchToken = async () => {
+      const activeUserToken = localStorage.getItem('rc_token')
+      if (activeUserToken) return
+
       const token = localStorage.getItem('recircula_token')
       if (!token) {
         try {
@@ -204,7 +209,27 @@ function App() {
           >
             Mis Tratos
           </span>
-          <span className="user-status">👤 Tester (Juan Perez)</span>
+          <span className="user-status">👤 {user?.nombre || 'Usuario'} ({user?.rol === 'REPARADOR_VERIFICADO' ? 'Reparador' : user?.rol === 'ADMINISTRADOR' ? 'Admin' : 'Usuario'})</span>
+          <button
+            onClick={() => {
+              clearSession()
+              localStorage.removeItem('recircula_token')
+              window.location.href = '/login'
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#ef4444',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+            }}
+          >
+            <LogOut size={16} /> Cerrar Sesión
+          </button>
           {view === 'list' && (
             <button className="btn-primary" onClick={() => setView('create')}>
               <Plus size={18} /> Publicar Artículo
@@ -228,7 +253,14 @@ function App() {
         />
       )}
 
-      {view === 'tratos' && <TransactionsDashboard />}
+      {view === 'tratos' && (
+        <TransactionsDashboard
+          onViewPublication={(id) => {
+            setActivePublicationId(id)
+            setView('details')
+          }}
+        />
+      )}
 
       {view === 'list' && (
         <div className="dashboard-container">
