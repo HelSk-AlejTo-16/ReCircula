@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { publicationsApi } from '../services/api'
 import { MapPin, Clock, Archive, ArrowLeft, Layers } from 'lucide-react'
 import './PublicationDetails.css'
@@ -10,14 +10,18 @@ interface PublicationDetailsProps {
   onEdit: () => void
 }
 
-export default function PublicationDetails({ publicationId, onBack, onEdit }: PublicationDetailsProps) {
+export default function PublicationDetails({
+  publicationId,
+  onBack,
+  onEdit,
+}: PublicationDetailsProps) {
   const [pub, setPub] = useState<any>(null)
   const [activeImageIdx, setActiveImageIdx] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [archiving, setArchiving] = useState(false)
 
-  const fetchDetail = async () => {
+  const fetchDetail = useCallback(async () => {
     try {
       setLoading(true)
       const data = await publicationsApi.getPublicationDetail(publicationId)
@@ -27,12 +31,12 @@ export default function PublicationDetails({ publicationId, onBack, onEdit }: Pu
     } finally {
       setLoading(false)
     }
-  }
+  }, [publicationId])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDetail()
-  }, [publicationId])
+  }, [fetchDetail])
 
   const handleArchive = async () => {
     const token = localStorage.getItem('recircula_token')
@@ -206,7 +210,7 @@ export default function PublicationDetails({ publicationId, onBack, onEdit }: Pu
                   gap: '8px',
                 }}
               >
-                <Layers size={18} color="#10b981" /> Desglose de Componentes (Hardware Mining)
+                <Layers size={18} color="#2D6A4F" /> Desglose de Componentes (Hardware Mining)
               </h3>
               <div className="components-list">
                 {pub.componentes.map((comp: any) => (
@@ -218,7 +222,7 @@ export default function PublicationDetails({ publicationId, onBack, onEdit }: Pu
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       {comp.precioPieza && (
-                        <span style={{ fontWeight: '700', color: '#10b981' }}>
+                        <span style={{ fontWeight: '700', color: '#2D6A4F' }}>
                           ${parseFloat(comp.precioPieza).toFixed(2)} MXN
                         </span>
                       )}
@@ -243,16 +247,10 @@ export default function PublicationDetails({ publicationId, onBack, onEdit }: Pu
                 gap: '8px',
               }}
             >
-              <MapPin size={18} color="#10b981" /> Ubicación del artículo
+              <MapPin size={18} color="#2D6A4F" /> Ubicación del artículo
             </h3>
-            {pub.ubicacion && (
-              <div className="map-coords">
-                <span>Lat: {pub.ubicacion.latitud}</span>
-                <span>Lng: {pub.ubicacion.longitud}</span>
-              </div>
-            )}
             {pub.direccionReferencia && (
-              <p style={{ fontSize: '0.9rem', color: '#d1d5db', margin: 0 }}>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0 }}>
                 <strong>Referencia:</strong> {pub.direccionReferencia}
               </p>
             )}
@@ -263,10 +261,25 @@ export default function PublicationDetails({ publicationId, onBack, onEdit }: Pu
       {/* Botones de acción del propietario */}
       {pub.estado !== 'ARCHIVADO' && (
         <div className="action-row" style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn-primary" onClick={onEdit} style={{ flex: '1', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+          <button
+            className="btn-primary"
+            onClick={onEdit}
+            style={{
+              flex: '1',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
             Editar publicación
           </button>
-          <button className="btn-secondary" onClick={handleArchive} disabled={archiving} style={{ flex: '1' }}>
+          <button
+            className="btn-secondary"
+            onClick={handleArchive}
+            disabled={archiving}
+            style={{ flex: '1' }}
+          >
             <Archive size={18} /> {archiving ? 'Archivando...' : 'Archivar publicación'}
           </button>
         </div>

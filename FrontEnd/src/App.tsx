@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { publicationsApi } from './modules/publications/services/api'
 import type { FiltrosBusqueda } from './modules/publications/services/api'
 import CreatePublication from './modules/publications/pages/CreatePublication'
@@ -67,7 +67,24 @@ function App() {
     fetchToken()
   }, [])
 
-  const fetchPublications = async () => {
+  // Obtener geolocalización cuando se activa el filtro por cercanía
+  useEffect(() => {
+    if (usarGeo) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLatitud(position.coords.latitude.toString())
+            setLongitud(position.coords.longitude.toString())
+          },
+          (error) => {
+            console.log('Using default coordinates due to geolocation block/error:', error)
+          }
+        )
+      }
+    }
+  }, [usarGeo])
+
+  const fetchPublications = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -88,14 +105,14 @@ function App() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [categoria, modalidad, usarGeo, latitud, longitud, radioKm])
 
   useEffect(() => {
     if (view === 'list') {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPublications()
     }
-  }, [view, categoria, modalidad, usarGeo])
+  }, [view, fetchPublications])
 
   const handleProximitySearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -147,14 +164,14 @@ function App() {
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              background: 'rgba(16, 185, 129, 0.1)',
+              background: 'rgba(45, 106, 79, 0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '1px solid #10b981',
+              border: '1px solid #2D6A4F',
             }}
           >
-            <RefreshCw size={20} color="#10b981" />
+            <RefreshCw size={20} color="#2D6A4F" />
           </div>
           <span className="logo-text" onClick={() => setView('list')} style={{ cursor: 'pointer' }}>
             ReCircula
@@ -175,10 +192,7 @@ function App() {
       {view === 'create' && <CreatePublication onBack={() => setView('list')} />}
 
       {view === 'edit' && (
-        <CreatePublication
-          editId={activePublicationId}
-          onBack={() => setView('details')}
-        />
+        <CreatePublication editId={activePublicationId} onBack={() => setView('details')} />
       )}
 
       {view === 'details' && (
@@ -200,10 +214,10 @@ function App() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                color: '#e5e7eb',
+                color: 'var(--text-primary)',
               }}
             >
-              <SlidersHorizontal size={18} color="#10b981" /> Filtros de Búsqueda
+              <SlidersHorizontal size={18} color="var(--primary)" /> Filtros de Búsqueda
             </h3>
 
             <form onSubmit={handleProximitySearch} className="filters-grid">
@@ -229,62 +243,54 @@ function App() {
                 </select>
               </div>
 
-              <div
-                className="filter-group"
-                style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', height: '42px' }}
-              >
+              <div className="filter-group-checkbox">
                 <input
                   type="checkbox"
                   id="geo-chk"
                   checked={usarGeo}
                   onChange={(e) => setUsarGeo(e.target.checked)}
-                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  className="custom-checkbox"
                 />
-                <label htmlFor="geo-chk" style={{ cursor: 'pointer', userSelect: 'none' }}>
-                  Filtro Geográfico (PostGIS)
+                <label htmlFor="geo-chk" className="checkbox-label">
+                  Buscar por cercanía
                 </label>
               </div>
 
               {usarGeo && (
-                <>
-                  <div className="filter-group">
-                    <label>Lat / Lng (Simulador)</label>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <input
-                        type="text"
-                        placeholder="Lat"
-                        value={latitud}
-                        onChange={(e) => setLatitud(e.target.value)}
-                        style={{ width: '80px' }}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Lng"
-                        value={longitud}
-                        onChange={(e) => setLongitud(e.target.value)}
-                        style={{ width: '80px' }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="filter-group">
-                    <label>Radio (km): {radioKm} km</label>
-                    <input
-                      type="range"
-                      min="5"
-                      max="50"
-                      value={radioKm}
-                      onChange={(e) => setRadioKm(e.target.value)}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </div>
-                </>
+                <div className="filter-group" style={{ minWidth: '240px' }}>
+                  <label>Radio de búsqueda: {radioKm} km</label>
+                  <input
+                    type="range"
+                    min="5"
+                    max="500"
+                    value={radioKm}
+                    onChange={(e) => setRadioKm(e.target.value)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span
+                    style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}
+                  >
+                    Coordenadas detectadas: {parseFloat(latitud).toFixed(4)},{' '}
+                    {parseFloat(longitud).toFixed(4)}
+                  </span>
+                </div>
               )}
 
               {usarGeo && (
-                <button type="submit" className="btn-primary" style={{ padding: '10px 14px' }}>
-                  <Search size={18} /> Filtrar
-                </button>
+                <div className="filter-group" style={{ marginTop: 'auto' }}>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    style={{
+                      padding: '12px 18px',
+                      width: '100%',
+                      height: '42px',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Search size={18} /> Filtrar
+                  </button>
+                </div>
               )}
             </form>
           </div>
@@ -301,13 +307,16 @@ function App() {
               className="text-center"
               style={{
                 padding: '80px 40px',
-                background: 'var(--panel-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '20px',
+                background: 'var(--card-bg, #ffffff)',
+                border: '1px solid var(--border-color, #E0D9CF)',
+                borderRadius: '16px',
+                boxShadow: '0 4px 20px rgba(45, 106, 79, 0.03)',
               }}
             >
-              <Info size={40} color="#10b981" style={{ margin: '0 auto 16px' }} />
-              <h3 style={{ margin: '0 0 8px', color: 'white' }}>No se encontraron artículos</h3>
+              <Info size={40} color="var(--primary)" style={{ margin: '0 auto 16px' }} />
+              <h3 style={{ margin: '0 0 8px', color: 'var(--primary)', fontWeight: '700' }}>
+                No se encontraron artículos
+              </h3>
               <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
                 Intenta cambiando los filtros de búsqueda o sé el primero en publicar un nuevo
                 equipo.
@@ -350,7 +359,7 @@ function App() {
 
                         {item.distanciaKm !== undefined && (
                           <span className="card-dist">
-                            <MapPin size={12} color="#10b981" />
+                            <MapPin size={12} color="#2D6A4F" />
                             {item.distanciaKm} km
                           </span>
                         )}

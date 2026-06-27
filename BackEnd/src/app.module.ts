@@ -27,10 +27,8 @@ import { PublicationsModule } from './modules/publications/publications.module';
     // ── TypeORM conectado a PostgreSQL (schema ya existente) ─────────────────
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) =>
-        config.get<TypeOrmModuleOptions>('database')!,
       useFactory: (config: ConfigService) => {
-        const dbConfig = config.get('database');
+        const dbConfig = config.get<TypeOrmModuleOptions>('database');
         if (!dbConfig) {
           throw new Error('La configuración de base de datos no existe');
         }
