@@ -84,4 +84,85 @@ export const publicationsApi = {
     }
     return res.json()
   },
+
+  async proposeTransaction(
+    data: { publicacionId: string; modalidad: string; precioAcordado?: number; notas?: string },
+    token: string
+  ) {
+    const res = await fetch(`${API_BASE_URL}/transactions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || 'Error al proponer el trato')
+    }
+    return res.json()
+  },
+
+  async getTransactions(token: string) {
+    const res = await fetch(`${API_BASE_URL}/transactions`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || 'Error al obtener transacciones')
+    }
+    return res.json()
+  },
+
+  async acceptTransaction(id: string, token: string) {
+    const res = await fetch(`${API_BASE_URL}/transactions/${id}/accept`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || 'Error al aceptar el trato')
+    }
+    return res.json()
+  },
+
+  async cancelTransaction(id: string, notas: string, token: string) {
+    const res = await fetch(`${API_BASE_URL}/transactions/${id}/cancel`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ notas }),
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || 'Error al cancelar el trato')
+    }
+    return res.json()
+  },
+
+  async confirmTransaction(id: string, token: string) {
+    const res = await fetch(`${API_BASE_URL}/transactions/${id}/confirm`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || 'Error al confirmar el trato')
+    }
+    return res.json()
+  },
 }

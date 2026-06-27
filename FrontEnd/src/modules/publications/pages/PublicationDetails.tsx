@@ -20,6 +20,46 @@ export default function PublicationDetails({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [archiving, setArchiving] = useState(false)
+  const [showProposalModal, setShowProposalModal] = useState(false)
+  const [proposalPrice, setProposalPrice] = useState('')
+  const [proposalNotes, setProposalNotes] = useState('')
+  const [proposing, setProposing] = useState(false)
+
+  const handlePropose = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const token = localStorage.getItem('recircula_token')
+    if (!token) {
+      alert('Debes iniciar sesión para realizar esta acción.')
+      return
+    }
+
+    if ((pub.modalidad === 'VENTA' || pub.modalidad === 'VENTA_PIEZAS') && !proposalPrice) {
+      alert('Por favor especifica un precio.')
+      return
+    }
+
+    try {
+      setProposing(true)
+      await publicationsApi.proposeTransaction(
+        {
+          publicacionId: publicationId,
+          modalidad: pub.modalidad,
+          precioAcordado: proposalPrice ? parseFloat(proposalPrice) : undefined,
+          notas: proposalNotes || undefined,
+        },
+        token
+      )
+      alert('¡Propuesta de trato enviada con éxito!')
+      setShowProposalModal(false)
+      setProposalNotes('')
+      setProposalPrice('')
+      fetchDetail() // Refresh page details
+    } catch (err: any) {
+      alert(err.message || 'Error al proponer el trato.')
+    } finally {
+      setProposing(false)
+    }
+  }
 
   const fetchDetail = useCallback(async () => {
     try {
@@ -34,7 +74,6 @@ export default function PublicationDetails({
   }, [publicationId])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDetail()
   }, [fetchDetail])
 
@@ -258,30 +297,162 @@ export default function PublicationDetails({
         </div>
       </div>
 
-      {/* Botones de acción del propietario */}
+      {/* Botones de acción según rol */}
       {pub.estado !== 'ARCHIVADO' && (
-        <div className="action-row" style={{ display: 'flex', gap: '12px' }}>
-          <button
-            className="btn-primary"
-            onClick={onEdit}
-            style={{
-              flex: '1',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            Editar publicación
-          </button>
-          <button
-            className="btn-secondary"
-            onClick={handleArchive}
-            disabled={archiving}
-            style={{ flex: '1' }}
-          >
-            <Archive size={18} /> {archiving ? 'Archivando...' : 'Archivar publicación'}
-          </button>
+        <div className="action-row" style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          {pub.publicadorId === '00000000-0000-0000-0000-000000000001' ? (
+            <>
+              <button
+                className="btn-primary"
+                onClick={onEdit}
+                style={{
+                  flex: '1',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                Editar publicación
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={handleArchive}
+                disabled={archiving}
+                style={{ flex: '1' }}
+              >
+                <Archive size={18} /> {archiving ? 'Archivando...' : 'Archivar publicación'}
+              </button>
+            </>
+          ) : (
+            pub.estado === 'PUBLICADO' && (
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  setShowProposalModal(true)
+                  setProposalPrice(pub.precio?.toString() || '')
+                }}
+                style={{
+                  flex: '1',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '14px',
+                  fontSize: '1.05rem',
+                }}
+              >
+                Proponer Trato / Intercambio
+              </button>
+            )
+          )}
+        </div>
+      )}
+
+      {/* Modal de Propuesta de Trato */}
+      {showProposalModal && (
+        <div className="proposal-modal-overlay">
+          <div className="proposal-modal">
+            <h3 style={{ margin: '0 0 12px', fontSize: '1.25rem', color: 'var(--text-primary)' }}>
+              Proponer Trato
+            </h3>
+            <p style={{ margin: '0 0 8px', color: 'var(--text-secondary)' }}>
+              Artículo: <strong style={{ color: 'var(--primary)' }}>{pub.titulo}</strong>
+            </p>
+            <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)' }}>
+              Modalidad:{' '}
+              <strong>
+                {pub.modalidad === 'DONACION'
+                  ? 'Donación'
+                  : pub.modalidad === 'VENTA'
+                    ? 'Venta'
+                    : pub.modalidad === 'TRUEQUE'
+                      ? 'Trueque'
+                      : 'Venta de piezas'}
+              </strong>
+            </p>
+
+            <form onSubmit={handlePropose}>
+              {(pub.modalidad === 'VENTA' || pub.modalidad === 'VENTA_PIEZAS') && (
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      marginBottom: '6px',
+                      fontSize: '0.9rem',
+                      color: 'var(--text-secondary)',
+                    }}
+                  >
+                    Precio acordado (MXN)
+                  </label>
+                  <input
+                    type="number"
+                    value={proposalPrice}
+                    onChange={(e) => setProposalPrice(e.target.value)}
+                    required
+                    min="0"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-color)',
+                      color: 'var(--text-primary)',
+                    }}
+                  />
+                </div>
+              )}
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    marginBottom: '6px',
+                    fontSize: '0.9rem',
+                    color: 'var(--text-secondary)',
+                  }}
+                >
+                  Notas / Detalles del trato
+                </label>
+                <textarea
+                  placeholder="Detalla tu propuesta aquí (ej. qué ofreces a cambio en caso de trueque, o qué piezas necesitas)."
+                  value={proposalNotes}
+                  onChange={(e) => setProposalNotes(e.target.value)}
+                  rows={4}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-primary)',
+                    resize: 'vertical',
+                  }}
+                />
+              </div>
+
+              <div
+                className="modal-actions"
+                style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}
+              >
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowProposalModal(false)}
+                  style={{ padding: '8px 16px' }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={proposing}
+                  style={{ padding: '8px 16px' }}
+                >
+                  {proposing ? 'Enviando...' : 'Enviar propuesta'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

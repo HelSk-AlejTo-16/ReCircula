@@ -4,6 +4,7 @@ import { publicationsApi } from './modules/publications/services/api'
 import type { FiltrosBusqueda } from './modules/publications/services/api'
 import CreatePublication from './modules/publications/pages/CreatePublication'
 import PublicationDetails from './modules/publications/pages/PublicationDetails'
+import TransactionsDashboard from './modules/publications/pages/TransactionsDashboard'
 import { Plus, Search, MapPin, RefreshCw, SlidersHorizontal, Info } from 'lucide-react'
 import './App.css'
 
@@ -24,7 +25,7 @@ const CATEGORIAS = [
 ]
 
 function App() {
-  const [view, setView] = useState<'list' | 'create' | 'details' | 'edit'>('list')
+  const [view, setView] = useState<'list' | 'create' | 'details' | 'edit' | 'tratos'>('list')
   const [activePublicationId, setActivePublicationId] = useState<string>('')
 
   // Estados del listado
@@ -178,7 +179,31 @@ function App() {
           </span>
         </div>
 
-        <div className="nav-actions">
+        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span
+            className="nav-link"
+            onClick={() => setView('list')}
+            style={{
+              cursor: 'pointer',
+              color: view === 'list' ? '#2D6A4F' : '#9ca3af',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+            }}
+          >
+            Catálogo
+          </span>
+          <span
+            className="nav-link"
+            onClick={() => setView('tratos')}
+            style={{
+              cursor: 'pointer',
+              color: view === 'tratos' ? '#2D6A4F' : '#9ca3af',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+            }}
+          >
+            Mis Tratos
+          </span>
           <span className="user-status">👤 Tester (Juan Perez)</span>
           {view === 'list' && (
             <button className="btn-primary" onClick={() => setView('create')}>
@@ -202,6 +227,8 @@ function App() {
           onEdit={() => setView('edit')}
         />
       )}
+
+      {view === 'tratos' && <TransactionsDashboard />}
 
       {view === 'list' && (
         <div className="dashboard-container">

@@ -8,9 +8,9 @@ import mailConfig from './config/mail.config';
 // Módulos de negocio
 import { IdentityModule } from './modules/identity/identity.module';
 import { PublicationsModule } from './modules/publications/publications.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 // Los siguientes módulos se implementan en futuros sprints:
-// import { TransactionsModule }   from './modules/transactions/transactions.module';
 // import { HistoryModule }        from './modules/history/history.module';
 // import { MatchmakingModule }    from './modules/matchmaking/matchmaking.module';
 // import { ReputationModule }     from './modules/reputation/reputation.module';
@@ -42,6 +42,9 @@ import { PublicationsModule } from './modules/publications/publications.module';
 
     // ── RF-02: Gestión de publicaciones y artículos ──────────────────────────
     PublicationsModule,
+
+    // ── RF-04: Gestión de transacciones e intercambios ───────────────────────
+    TransactionsModule,
   ],
 })
 export class AppModule {}
