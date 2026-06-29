@@ -1,0 +1,61 @@
+.notif-bell-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.notif-bell-btn {
+  position: relative;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4b5563; /* Gris oscuro para el tema claro */
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+.notif-bell-btn:hover {
+  background: #f3f4f6; /* Gris muy claro */
+  color: #2D6A4F; /* Verde principal */
+  transform: scale(1.05);
+}
+
+.notif-bell-btn:active {
+  transform: scale(0.96);
+}
+
+.notif-bell-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.notif-bell-badge {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #ef4444; /* Rojo para destacar */
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff; /* Borde blanco para separar del fondo claro */
+  animation: badge-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  line-height: 1;
+}
+
+@keyframes badge-pop {
+  0%   { transform: scale(0); }
+  70%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}

@@ -8,6 +8,7 @@ import { ImagenPublicacion } from './entities/image.entity';
 import { CategoriaArticulo } from './entities/categoria-articulo.entity';
 import { PublicationsRepository } from './repositories/publications.repository';
 import { TypeOrmPublicationsRepository } from './repositories/typeorm-publications.repository';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TypeOrmPublicationsRepository } from './repositories/typeorm-publicatio
       ImagenPublicacion,
       CategoriaArticulo,
     ]),
+    NotificationsModule,
   ],
   controllers: [PublicationsController],
   providers: [

@@ -15,6 +15,7 @@ import { Publication } from './entities/publication.entity';
 import { Componente } from './entities/component.entity';
 import { ImagenPublicacion } from './entities/image.entity';
 import { EstadoPublicacion, ModalidadIntercambio } from '../../common/types';
+import { NotificationsService } from '../notifications/notifications.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -32,6 +33,7 @@ export class PublicationsService {
   constructor(
     private readonly repo: PublicationsRepository,
     private readonly entityManager: EntityManager,
+    private readonly notificationsService: NotificationsService,
   ) {
     // Asegurarse de que el directorio de subidas exista
     if (!fs.existsSync(this.uploadDir)) {
@@ -149,7 +151,17 @@ export class PublicationsService {
     publicacion.imagenes = entidadImagenes;
     publicacion.componentes = entidadComponentes;
 
-    return this.repo.create(publicacion);
+    const publicacionCreada = await this.repo.create(publicacion);
+
+    // RF-07.3 — Alertar a usuarios con esta categoría como favorita
+    // Se ejecuta en segundo plano para no bloquear la respuesta al publicador
+    this.notificationsService.notificarCategoriaFavorita({
+      publicacionId: publicacionCreada.id,
+      tituloPublicacion: publicacionCreada.titulo,
+      categoria: publicacionCreada.categoria,
+    }).catch((err) => this.logger.error('Error al notificar categoría favorita', err));
+
+    return publicacionCreada;
   }
 
   async buscarTodas(filtros: FindAllOptions): Promise<Publication[]> {

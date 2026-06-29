@@ -7,6 +7,7 @@ import {
 import { TransactionsRepository } from './repositories/transactions.repository';
 import { PublicationsRepository } from '../publications/repositories/publications.repository';
 import { HistoryService } from '../history/history.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from './entities/transaction.entity';
 import {
@@ -21,6 +22,7 @@ export class TransactionsService {
     private readonly repo: TransactionsRepository,
     private readonly publicationsRepo: PublicationsRepository,
     private readonly historyService: HistoryService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async proponer(
@@ -74,6 +76,16 @@ export class TransactionsService {
       estadoNuevo: EstadoTransaccion.PENDIENTE,
       usuarioResponsableId: iniciadorId,
       notas: 'Trato propuesto',
+    });
+
+    // RF-07.1 — Notificar al dueño de la publicación que hay un interesado
+    // Buscamos el nombre del iniciador para personalizar el mensaje
+    const txConRelaciones = await this.repo.findById(tx.id);
+    await this.notificationsService.notificarInteresEnPublicacion({
+      publicadorId: pub.publicadorId,
+      iniciadorNombre: txConRelaciones?.iniciador?.nombre ?? 'Un usuario',
+      publicacionId: pub.id,
+      tituloPublicacion: pub.titulo,
     });
 
     return tx;
@@ -132,6 +144,14 @@ export class TransactionsService {
       notas: 'Trato aceptado, publicación reservada',
     });
 
+    // RF-07.2 — Notificar al iniciador que su trato fue aceptado
+    await this.notificationsService.notificarCambioEstadoTransaccion({
+      destinatarioId: tx.iniciadorId,
+      titulo: '¡Tu propuesta de trato fue aceptada!',
+      mensaje: `Tu propuesta ha sido aceptada. El artículo está reservado y el trato está en proceso.`,
+      transaccionId: tx.id,
+    });
+
     return guardada;
   }
 
@@ -180,6 +200,15 @@ export class TransactionsService {
       notas: notas || 'Trato cancelado',
     });
 
+    // RF-07.2 — Notificar a la otra parte que el trato fue cancelado
+    const otroUsuarioId = usuarioId === tx.iniciadorId ? tx.receptorId : tx.iniciadorId;
+    await this.notificationsService.notificarCambioEstadoTransaccion({
+      destinatarioId: otroUsuarioId,
+      titulo: 'Trato cancelado',
+      mensaje: `El trato ha sido cancelado. ${notas ? `Motivo: ${notas}` : ''}`,
+      transaccionId: tx.id,
+    });
+
     return guardada;
   }
 
@@ -188,6 +217,7 @@ export class TransactionsService {
     if (!tx) {
       throw new NotFoundException('Transacción no encontrada');
     }
+
 
     if (tx.iniciadorId !== usuarioId && tx.receptorId !== usuarioId) {
       throw new ForbiddenException(
@@ -237,6 +267,22 @@ export class TransactionsService {
         usuarioResponsableId: usuarioId,
         notas: 'Ambas partes confirmaron la recepción. Intercambio completado.',
       });
+
+      // RF-07.2 — Notificar a ambas partes que el trato fue completado
+      await Promise.all([
+        this.notificationsService.notificarCambioEstadoTransaccion({
+          destinatarioId: guardada.iniciadorId,
+          titulo: '¡Trato completado exitosamente!',
+          mensaje: `El intercambio fue confirmado por ambas partes. ¡Gracias por usar ReCircula!`,
+          transaccionId: guardada.id,
+        }),
+        this.notificationsService.notificarCambioEstadoTransaccion({
+          destinatarioId: guardada.receptorId,
+          titulo: '¡Trato completado exitosamente!',
+          mensaje: `El intercambio fue confirmado por ambas partes. ¡Gracias por usar ReCircula!`,
+          transaccionId: guardada.id,
+        }),
+      ]);
     } else {
       // Auditoría de confirmación parcial (mismo estado)
       await this.repo.saveAuditLog({

@@ -6,6 +6,7 @@ import { Transaction } from './entities/transaction.entity';
 import { TransactionAudit } from './entities/transaction-audit.entity';
 import { PublicationsModule } from '../publications/publications.module';
 import { HistoryModule } from '../history/history.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { TransactionsRepository } from './repositories/transactions.repository';
 import { TypeOrmTransactionsRepository } from './repositories/typeorm-transactions.repository';
 
@@ -14,6 +15,7 @@ import { TypeOrmTransactionsRepository } from './repositories/typeorm-transactio
     TypeOrmModule.forFeature([Transaction, TransactionAudit]),
     PublicationsModule,
     HistoryModule,
+    NotificationsModule,
   ],
   controllers: [TransactionsController],
   providers: [

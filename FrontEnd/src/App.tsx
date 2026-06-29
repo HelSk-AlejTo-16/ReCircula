@@ -10,6 +10,7 @@ import PerfilReparador from './modules/reputation/pages/PerfilReparador'
 import SolicitarVerificacion from './modules/reputation/pages/SolicitarVerificacion'
 import ArcoDashboard from './modules/identity/pages/ArcoDashboard'
 import { useAuthStore } from './store/authStore'
+import { NotificationBell } from './modules/notifications/components/NotificationBell'
 import { Plus, RefreshCw, LogOut, ShieldCheck, Wrench, Search, MapPin, SlidersHorizontal, Info } from 'lucide-react'
 import './App.css'
 
