@@ -5,6 +5,7 @@ import type { FiltrosBusqueda } from './modules/publications/services/api'
 import CreatePublication from './modules/publications/pages/CreatePublication'
 import PublicationDetails from './modules/publications/pages/PublicationDetails'
 import TransactionsDashboard from './modules/publications/pages/TransactionsDashboard'
+import MatchmakingReparadores from './modules/publications/pages/MatchmakingReparadores'
 import { Plus, Search, MapPin, RefreshCw, SlidersHorizontal, Info } from 'lucide-react'
 import './App.css'
 
@@ -25,7 +26,7 @@ const CATEGORIAS = [
 ]
 
 function App() {
-  const [view, setView] = useState<'list' | 'create' | 'details' | 'edit' | 'tratos'>('list')
+  const [view, setView] = useState<'list' | 'create' | 'details' | 'edit' | 'tratos' | 'reparadores'>('list')
   const [activePublicationId, setActivePublicationId] = useState<string>('')
 
   // Estados del listado
@@ -93,13 +94,18 @@ function App() {
       if (categoria !== 'Todas') filtros.categoria = categoria
       if (modalidad !== 'Todas') filtros.modalidad = modalidad
 
+      let data;
       if (usarGeo) {
         filtros.latitud = parseFloat(latitud)
         filtros.longitud = parseFloat(longitud)
         filtros.radioKm = parseFloat(radioKm)
+        // Usar API de matchmaking cuando hay búsqueda geoespacial
+        const res = await import('./modules/publications/services/api').then(m => m.matchmakingApi.getPublicaciones(filtros))
+        data = res.resultados || [] // La respuesta del backend trae { total, radioKm, resultados: [] }
+      } else {
+        data = await publicationsApi.getPublications(filtros)
       }
-
-      const data = await publicationsApi.getPublications(filtros)
+      
       setPublications(data)
     } catch (err: any) {
       setError(err.message || 'Error al obtener publicaciones')
@@ -204,6 +210,18 @@ function App() {
           >
             Mis Tratos
           </span>
+          <span
+            className="nav-link"
+            onClick={() => setView('reparadores')}
+            style={{
+              cursor: 'pointer',
+              color: view === 'reparadores' ? '#2D6A4F' : '#9ca3af',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+            }}
+          >
+            Reparadores Locales
+          </span>
           <span className="user-status">👤 Tester (Juan Perez)</span>
           {view === 'list' && (
             <button className="btn-primary" onClick={() => setView('create')}>
@@ -229,6 +247,8 @@ function App() {
       )}
 
       {view === 'tratos' && <TransactionsDashboard />}
+
+      {view === 'reparadores' && <MatchmakingReparadores />}
 
       {view === 'list' && (
         <div className="dashboard-container">

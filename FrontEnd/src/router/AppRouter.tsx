@@ -33,14 +33,14 @@ export function AppRouter() {
           <Route path="/" element={<App />} />
         </Route>
 
-        {/* ── Rutas privadas: solo ADMINISTRADOR ───────────────────────── */}
-        <Route element={<ProtectedRoute allowedRoles={['ADMINISTRADOR']} />}>
+        {/* ── Rutas privadas: solo ADMIN ───────────────────────── */}
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
           <Route path="/admin/dashboard" element={<div>Panel Admin</div>} />
         </Route>
 
-        {/* ── Rutas privadas: REPARADOR_VERIFICADO o ADMINISTRADOR ─────── */}
+        {/* ── Rutas privadas: VENDEDOR_REPARADOR o ADMIN ─────── */}
         <Route
-          element={<ProtectedRoute allowedRoles={['REPARADOR_VERIFICADO', 'ADMINISTRADOR']} />}
+          element={<ProtectedRoute allowedRoles={['VENDEDOR_REPARADOR', 'ADMIN']} />}
         >
           <Route path="/reparador/perfil" element={<div>Panel Reparador</div>} />
         </Route>

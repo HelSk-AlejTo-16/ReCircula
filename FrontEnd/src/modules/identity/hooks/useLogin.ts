@@ -19,10 +19,10 @@ export function useLogin() {
 
       // Redirige según rol
       switch (usuario.rol) {
-        case 'ADMINISTRADOR':
+        case 'ADMIN':
           navigate('/admin/dashboard');
           break;
-        case 'REPARADOR_VERIFICADO':
+        case 'VENDEDOR_REPARADOR':
           navigate('/reparador/perfil');
           break;
         default:

@@ -166,3 +166,37 @@ export const publicationsApi = {
     return res.json()
   },
 }
+
+export const matchmakingApi = {
+  async getPublicaciones(filtros: FiltrosBusqueda = {}) {
+    const params = new URLSearchParams()
+    if (filtros.latitud !== undefined && filtros.longitud !== undefined) {
+      params.append('latitud', filtros.latitud.toString())
+      params.append('longitud', filtros.longitud.toString())
+      if (filtros.radioKm) params.append('radioKm', filtros.radioKm.toString())
+    }
+    if (filtros.categoria) params.append('categoria', filtros.categoria)
+    if (filtros.modalidad) params.append('modalidad', filtros.modalidad)
+
+    const res = await fetch(`${API_BASE_URL}/matchmaking/publicaciones?${params.toString()}`)
+    if (!res.ok) {
+      throw new Error('Error al obtener publicaciones cercanas')
+    }
+    return res.json()
+  },
+
+  async getReparadores(filtros: { latitud: number; longitud: number; categoria: string; radioKm?: number }) {
+    const params = new URLSearchParams()
+    params.append('latitud', filtros.latitud.toString())
+    params.append('longitud', filtros.longitud.toString())
+    params.append('categoria', filtros.categoria)
+    if (filtros.radioKm) params.append('radioKm', filtros.radioKm.toString())
+
+    const res = await fetch(`${API_BASE_URL}/matchmaking/reparadores?${params.toString()}`)
+    if (!res.ok) {
+      throw new Error('Error al buscar reparadores cercanos')
+    }
+    return res.json()
+  },
+}
+
