@@ -41,6 +41,9 @@ export class Usuario {
   @Column({ default: true })
   activo: boolean;
 
+  @Column({ name: 'permitir_matchmaking', default: true })
+  permitirMatchmaking: boolean;
+
   @CreateDateColumn({ name: 'fecha_registro', type: 'timestamptz' })
   fechaRegistro: Date;
 
