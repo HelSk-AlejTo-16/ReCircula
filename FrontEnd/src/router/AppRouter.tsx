@@ -1,12 +1,14 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ProtectedRoute } from '../modules/identity/components/ProtectedRoute';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { ProtectedRoute } from '../modules/identity/components/ProtectedRoute'
+
+import App from '../App'
 
 // Páginas de identidad
-import { LoginPage } from '../modules/identity/pages/LoginPage';
-import { RegisterPage } from '../modules/identity/pages/RegisterPage';
-import { VerifyEmailPage } from '../modules/identity/pages/Verifyemailpage';
-import { ForgotPasswordPage } from '../modules/identity/pages/Forgotpasswordpage';
-import { ResetPasswordPage } from '../modules/identity/pages/Resetpasswordpage';
+import { LoginPage } from '../modules/identity/pages/LoginPage'
+import { RegisterPage } from '../modules/identity/pages/RegisterPage'
+import { VerifyEmailPage } from '../modules/identity/pages/Verifyemailpage'
+import { ForgotPasswordPage } from '../modules/identity/pages/Forgotpasswordpage'
+import { ResetPasswordPage } from '../modules/identity/pages/Resetpasswordpage'
 
 /**
  * AppRouter — Árbol de rutas de ReCircula.
@@ -28,7 +30,7 @@ export function AppRouter() {
 
         {/* ── Rutas privadas: cualquier usuario autenticado ─────────────── */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<div>Inicio — próximamente</div>} />
+          <Route path="/" element={<App />} />
         </Route>
 
         {/* ── Rutas privadas: solo ADMINISTRADOR ───────────────────────── */}
@@ -38,11 +40,7 @@ export function AppRouter() {
 
         {/* ── Rutas privadas: REPARADOR_VERIFICADO o ADMINISTRADOR ─────── */}
         <Route
-          element={
-            <ProtectedRoute
-              allowedRoles={['REPARADOR_VERIFICADO', 'ADMINISTRADOR']}
-            />
-          }
+          element={<ProtectedRoute allowedRoles={['REPARADOR_VERIFICADO', 'ADMINISTRADOR']} />}
         >
           <Route path="/reparador/perfil" element={<div>Panel Reparador</div>} />
         </Route>
@@ -51,5 +49,5 @@ export function AppRouter() {
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
-  );
+  )
 }

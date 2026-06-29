@@ -26,7 +26,35 @@ const CATEGORIAS = [
   'Otros',
 ]
 
-export default function CreatePublication({ onBack, editId }: { onBack?: () => void; editId?: string }) {
+export default function CreatePublication({
+  onBack,
+  editId,
+}: {
+  onBack?: () => void
+  editId?: string
+}) {
+  const [titulo, setTitulo] = useState('')
+  const [descripcion, setDescripcion] = useState('')
+  const [categoria, setCategoria] = useState(CATEGORIAS[0])
+  const [modalidad, setModalidad] = useState('DONACION')
+  const [precio, setPrecio] = useState('')
+  const [condicion, setCondicion] = useState('Buen estado')
+  const [latitud, setLatitud] = useState('21.1561') // Defecto Dolores Hidalgo
+  const [longitud, setLongitud] = useState('-101.3562')
+  const [direccionReferencia, setDireccionReferencia] = useState('')
+
+  // Componentes (Hardware Mining)
+  const [componentes, setComponentes] = useState<ComponenteInput[]>([])
+
+  // Imágenes
+  const [images, setImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
   // Silent Login para desarrollo (RF-01)
   useEffect(() => {
     const fetchToken = async () => {
@@ -68,7 +96,7 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
           setLatitud(data.ubicacion.latitud.toString())
           setLongitud(data.ubicacion.longitud.toString())
           setDireccionReferencia(data.direccionReferencia || '')
-          
+
           // Parsear la condición si viene en el formato "[Condición: X] descripcion"
           const match = data.descripcion.match(/^\[Condición:\s*([^\]]+)\]\s*(.*)/)
           if (match) {
@@ -86,28 +114,6 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
       loadPubData()
     }
   }, [editId])
-
-  const [titulo, setTitulo] = useState('')
-  const [descripcion, setDescripcion] = useState('')
-  const [categoria, setCategoria] = useState(CATEGORIAS[0])
-  const [modalidad, setModalidad] = useState('DONACION')
-  const [precio, setPrecio] = useState('')
-  const [condicion, setCondicion] = useState('Buen estado')
-  const [latitud, setLatitud] = useState('21.1561') // Defecto Dolores Hidalgo
-  const [longitud, setLongitud] = useState('-101.3562')
-  const [direccionReferencia, setDireccionReferencia] = useState('')
-
-  // Componentes (Hardware Mining)
-  const [componentes, setComponentes] = useState<ComponenteInput[]>([])
-
-  // Imágenes
-  const [images, setImages] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
 
   // Agregar componente
   const addComponent = () => {
@@ -220,12 +226,12 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
           condition: condicion,
           categoria,
           modalidad,
-          precio: (modalidad === 'VENTA' || modalidad === 'VENTA_PIEZAS') ? parseFloat(precio) : null,
+          precio: modalidad === 'VENTA' || modalidad === 'VENTA_PIEZAS' ? parseFloat(precio) : null,
           direccionReferencia,
           ubicacion: {
             latitud: parseFloat(latitud),
             longitud: parseFloat(longitud),
-          }
+          },
         }
         await publicationsApi.updatePublication(editId, updateData, token)
       } else {
@@ -283,7 +289,9 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
     return (
       <div className="publication-container text-center">
         <CheckCircle size={64} color="#10b981" style={{ margin: '0 auto 20px' }} />
-        <h2 className="publication-title">{editId ? '¡Publicación Guardada!' : '¡Publicación Creada!'}</h2>
+        <h2 className="publication-title">
+          {editId ? '¡Publicación Guardada!' : '¡Publicación Creada!'}
+        </h2>
         <p className="publication-subtitle">
           {editId
             ? 'Los cambios se han guardado con éxito y ya están actualizados en el catálogo.'
@@ -429,8 +437,8 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
             <div className="form-section">
               <h2 className="section-title">Desglose de Componentes (Hardware Mining)</h2>
               <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '16px' }}>
-                Especifica cuáles piezas internas aún sirven. Esto ayuda a los reparadores a encontrar
-                materia prima útil.
+                Especifica cuáles piezas internas aún sirven. Esto ayuda a los reparadores a
+                encontrar materia prima útil.
               </p>
 
               {componentes.map((comp, idx) => (
@@ -476,7 +484,11 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
                         />
                       )}
 
-                      <button type="button" className="remove-btn" onClick={() => removeComponent(idx)}>
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => removeComponent(idx)}
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -543,14 +555,54 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
         <div className="form-section">
           <h2 className="section-title">Geolocalización</h2>
 
-          <div className="form-row" style={{ marginBottom: '16px' }}>
-            <div className="form-group">
-              <label>Latitud</label>
-              <input type="text" value={latitud} readOnly />
+          {/* Inputs ocultos de control */}
+          <input type="hidden" value={latitud} />
+          <input type="hidden" value={longitud} />
+
+          {/* Tarjeta de estado de ubicación amigable */}
+          <div
+            style={{
+              background: '#ffffff',
+              border: '1.5px solid var(--border-color, #E0D9CF)',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: 'rgba(45, 106, 79, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1.5px solid var(--primary, #2D6A4F)',
+                flexShrink: 0,
+              }}
+            >
+              <MapPin size={18} color="var(--primary, #2D6A4F)" />
             </div>
-            <div className="form-group">
-              <label>Longitud</label>
-              <input type="text" value={longitud} readOnly />
+            <div>
+              <p
+                style={{
+                  margin: '0 0 2px 0',
+                  fontWeight: '700',
+                  fontSize: '0.9rem',
+                  color: 'var(--primary, #2D6A4F)',
+                }}
+              >
+                Ubicación geográfica asignada
+              </p>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary, #6B6B6B)' }}>
+                {latitud && longitud
+                  ? `Establecida mediante coordenadas: ${parseFloat(latitud).toFixed(5)}, ${parseFloat(longitud).toFixed(5)}`
+                  : 'No se ha detectado ubicación aún.'}
+              </p>
             </div>
           </div>
 
@@ -571,7 +623,13 @@ export default function CreatePublication({ onBack, editId }: { onBack?: () => v
         </div>
 
         <button type="submit" className="submit-btn" disabled={loading}>
-          {loading ? (editId ? 'Guardando...' : 'Publicando...') : (editId ? 'Guardar Cambios' : 'Publicar Artículo')}
+          {loading
+            ? editId
+              ? 'Guardando...'
+              : 'Publicando...'
+            : editId
+              ? 'Guardar Cambios'
+              : 'Publicar Artículo'}
         </button>
       </form>
     </div>

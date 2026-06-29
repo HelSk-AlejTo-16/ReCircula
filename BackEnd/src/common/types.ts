@@ -73,3 +73,29 @@ export interface PublicationImage {
   orden: number;
   fechaSubida: string | Date;
 }
+
+export interface Transaction {
+  id: string;
+  publicacionId: string;
+  iniciadorId: string;
+  receptorId: string;
+  modalidad: ModalidadIntercambio;
+  estado: EstadoTransaccion;
+  precioAcordado?: number;
+  confirmacionIniciador: boolean;
+  confirmacionReceptor: boolean;
+  notas?: string;
+  fechaCreacion: string | Date;
+  fechaActualizacion: string | Date;
+  fechaCompletada?: string | Date;
+}
+
+export interface TransactionAudit {
+  id: string;
+  transaccionId: string;
+  estadoAnterior?: EstadoTransaccion;
+  estadoNuevo: EstadoTransaccion;
+  usuarioResponsableId: string;
+  notas?: string;
+  fechaCambio: string | Date;
+}
