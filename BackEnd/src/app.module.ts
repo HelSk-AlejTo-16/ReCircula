@@ -14,6 +14,7 @@ import { MatchmakingModule }    from './modules/matchmaking/matchmaking.module';
 import { ReputationModule }     from './modules/reputation/reputation.module';
 // import { HistoryModule }        from './modules/history/history.module';
 // import { NotificationsModule }  from './modules/notifications/notifications.module';
+import { ArcoModule } from './modules/arco/arco.module';
 
 @Module({
   imports: [
@@ -48,8 +49,11 @@ import { ReputationModule }     from './modules/reputation/reputation.module';
     // ── RF-04: Gestión de transacciones e intercambios ───────────────────────
     TransactionsModule,
 
-    // ── RF-06: Sistema de Reputación y Verificación ──────────────────────────
+    // ── RF-06: Calificación y reputación ─────────────────────────────────────
     ReputationModule,
+
+    // ── RF-08: Derechos ARCO del Usuario ─────────────────────────────────────
+    ArcoModule,
   ],
 })
 export class AppModule {}

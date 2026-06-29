@@ -8,6 +8,7 @@ import TransactionsDashboard from './modules/publications/pages/TransactionsDash
 import MatchmakingReparadores from './modules/publications/pages/MatchmakingReparadores'
 import PerfilReparador from './modules/reputation/pages/PerfilReparador'
 import SolicitarVerificacion from './modules/reputation/pages/SolicitarVerificacion'
+import ArcoDashboard from './modules/identity/pages/ArcoDashboard'
 import { useAuthStore } from './store/authStore'
 import { Plus, RefreshCw, LogOut, ShieldCheck, Wrench, Search, MapPin, SlidersHorizontal, Info } from 'lucide-react'
 import './App.css'
@@ -32,7 +33,7 @@ function App() {
   const { user, clearSession } = useAuthStore()
   const rol = user?.rol || 'USUARIO_GENERAL'
 
-  const [view, setView] = useState<'list' | 'create' | 'details' | 'edit' | 'tratos' | 'reparadores' | 'perfil-reparador' | 'solicitar-verificacion'>('list')
+  const [view, setView] = useState<'list' | 'create' | 'details' | 'edit' | 'tratos' | 'reparadores' | 'perfil-reparador' | 'solicitar-verificacion' | 'arco'>('list')
   const [activePublicationId, setActivePublicationId] = useState<string>('')
   const [selectedReparadorId, setSelectedReparadorId] = useState<string>('')
 
@@ -201,6 +202,12 @@ function App() {
             </span>
           ) : null}
 
+          {/* ARCO */}
+          <span className="nav-link" onClick={() => setView('arco')}
+            style={{ cursor:'pointer', color: view==='arco' ? '#2D6A4F':'#9ca3af', fontWeight:'600', fontSize:'0.95rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <ShieldCheck size={16} /> Privacidad (ARCO)
+          </span>
+
           {/* Indicador de rol */}
           <span style={{
             display: 'flex', alignItems: 'center', gap: '6px',
@@ -279,6 +286,10 @@ function App() {
 
       {view === 'solicitar-verificacion' && (
         <SolicitarVerificacion onBack={() => setView('perfil-reparador')} />
+      )}
+
+      {view === 'arco' && (
+        <ArcoDashboard />
       )}
 
       {view === 'list' && (
