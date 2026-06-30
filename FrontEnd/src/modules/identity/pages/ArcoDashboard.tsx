@@ -4,7 +4,7 @@ import { useAuthStore } from '../../../store/authStore';
 import { arcoService } from '../services/arco.service';
 
 export default function ArcoDashboard() {
-  const { token, user, logout } = useAuthStore();
+  const { token, user, clearSession } = useAuthStore();
   const [loadingAcceso, setLoadingAcceso] = useState(false);
   const [loadingOposicion, setLoadingOposicion] = useState(false);
   const [loadingCancelacion, setLoadingCancelacion] = useState(false);
@@ -55,7 +55,7 @@ export default function ArcoDashboard() {
     try {
       const res = await arcoService.cancelarCuenta(token);
       alert(res.message);
-      logout(); // Fuerza el cierre de sesión porque la cuenta ya no es válida
+      clearSession(); // Fuerza el cierre de sesión porque la cuenta ya no es válida
       window.location.href = '/';
     } catch (err: any) {
       setMensaje({ texto: err.message, tipo: 'error' });

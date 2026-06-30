@@ -47,7 +47,7 @@ export class HistoryService {
       const users = await this.entityManager.createQueryBuilder(Usuario, 'u')
         .where('u.id IN (:...ids)', { ids: [iniciadorId, receptorId] })
         .getMany();
-      const repairer = users.find((u) => u.rol === RolUsuario.VENDEDOR_REPARADOR);
+      const repairer = users.find((u) => u.rol === RolUsuario.REPARADOR_VERIFICADO);
       if (repairer) {
         reparadorId = repairer.id;
       }

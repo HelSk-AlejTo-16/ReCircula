@@ -60,8 +60,7 @@ export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
   const data = await axiosClient
     .post<{ usuario: AuthUser; token: string }>('/identity/login', payload)
     .then((r) => r.data);
-  // El backend devuelve { usuario, token } — lo normalizamos a { usuario, accessToken }
-  return { usuario: data.usuario, accessToken: data.token };
+  return { usuario: data.usuario, token: data.token };
 };
 
 /** RF-01.3 — Solicitar enlace de recuperación de contraseña */
