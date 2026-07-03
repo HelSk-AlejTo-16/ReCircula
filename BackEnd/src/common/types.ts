@@ -114,3 +114,4 @@ export interface TransactionAudit {
   notas?: string;
   fechaCambio: string | Date;
 }
+
