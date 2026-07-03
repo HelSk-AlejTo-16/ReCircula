@@ -44,6 +44,9 @@ export class Usuario {
   @Column({ name: 'permitir_matchmaking', default: true })
   permitirMatchmaking: boolean;
 
+  @Column({ name: 'acepta_transferencias_terceros', default: false })
+  aceptaTransferenciasTerceros: boolean;
+
   @CreateDateColumn({ name: 'fecha_registro', type: 'timestamptz' })
   fechaRegistro: Date;
 

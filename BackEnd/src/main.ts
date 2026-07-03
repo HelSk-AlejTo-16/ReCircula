@@ -5,33 +5,46 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as express from 'express';
 import * as path from 'path';
+import compression from 'compression';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // ── OWASP: Helmet (Cabeceras de Seguridad HSTS, XSS, etc) ───────────────
+  app.use(helmet());
+
   // ── Prefijo global ────────────────────────────────────────────────────────
   app.setGlobalPrefix('api/v1');
 
-  // ── Validación de DTOs ────────────────────────────────────────────────────
+  // ── Compresión GZIP (RNF-01) ──────────────────────────────────────────────
+  app.use(compression({
+    filter: (req, res) => {
+      if (req.headers['accept']?.includes('text/event-stream')) {
+        return false;
+      }
+      return compression.filter(req, res);
+    }
+  }));
+
+  // ── Filtros y Pipes ───────────────────────────────────────────────────────
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // ignora propiedades no declaradas en el DTO
-      forbidNonWhitelisted: true, // lanza error si llegan propiedades extra
-      transform: true, // castea tipos automáticamente
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
-  // ── Filtro global de errores ──────────────────────────────────────────────
-  app.useGlobalFilters(new HttpExceptionFilter());
-
-  // ── CORS ─────────────────────────────────────────────────────────────────
-  app.enableCors({ origin: process.env.CORS_ORIGIN ?? '*' });
-
-  // ── Archivos Estáticos para Subidas ───────────────────────────────────────
+  // ── Servir estáticos (subidas) ───────────────────────────────────────────
   app.use(
     '/uploads',
     express.static(path.join(process.cwd(), 'public', 'uploads')),
   );
+
+  // ── CORS ─────────────────────────────────────────────────────────────────
+  app.enableCors({ origin: process.env.CORS_ORIGIN ?? '*' });
 
   // ── Swagger / OpenAPI ─────────────────────────────────────────────────────
   const swaggerCfg = new DocumentBuilder()

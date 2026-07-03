@@ -9,11 +9,12 @@ import { RegisterPage } from '../modules/identity/pages/RegisterPage'
 import { VerifyEmailPage } from '../modules/identity/pages/Verifyemailpage'
 import { ForgotPasswordPage } from '../modules/identity/pages/Forgotpasswordpage'
 import { ResetPasswordPage } from '../modules/identity/pages/Resetpasswordpage'
+import { AvisoPrivacidadPage } from '../modules/identity/pages/AvisoPrivacidadPage'
 
 /**
  * AppRouter — Árbol de rutas de ReCircula.
  *
- * Rutas públicas:   /login, /register, /verify-email, /forgot-password, /reset-password
+ * Rutas públicas:   /login, /register, /verify-email, /forgot-password, /reset-password, /aviso-privacidad
  * Rutas privadas:   /  (cualquier rol autenticado)
  * Rutas por rol:    /admin/dashboard, /reparador/perfil
  */
@@ -27,6 +28,7 @@ export function AppRouter() {
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/aviso-privacidad" element={<AvisoPrivacidadPage />} />
 
         {/* ── Rutas privadas: cualquier usuario autenticado ─────────────── */}
         <Route element={<ProtectedRoute />}>

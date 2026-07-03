@@ -7,18 +7,21 @@ import axios from 'axios';
  * - Si el servidor devuelve 401, limpia la sesión local y redirige a /login
  */
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Request: inyecta el Bearer token si existe ────────────────────────────────
-axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('rc_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ── Request: inyecta el Bearer token si existe ───────────────────────────────
+axiosClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('rc_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
 // ── Response: maneja 401 globalmente ─────────────────────────────────────────
 axiosClient.interceptors.response.use(

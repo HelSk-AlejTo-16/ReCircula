@@ -4,6 +4,7 @@ import {
   MinLength,
   MaxLength,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { RolUsuario } from '../entities/usuario.entity';
@@ -26,4 +27,8 @@ export class RegisterDto {
   @ApiProperty({ enum: RolUsuario, example: RolUsuario.USUARIO_GENERAL })
   @IsEnum(RolUsuario)
   rol: RolUsuario;
+
+  @ApiProperty({ example: true })
+  @IsBoolean()
+  aceptaTransferenciasTerceros: boolean;
 }

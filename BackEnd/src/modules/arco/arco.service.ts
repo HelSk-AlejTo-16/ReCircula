@@ -18,21 +18,21 @@ export class ArcoService {
     }
 
     // Aquí recopilamos la información. Como es una simulación de entrega, 
-    // enviamos un correo indicando que se ha procesado la solicitud.
-    const html = `
-      <h2>Tus datos personales (Derecho de Acceso ARCO)</h2>
-      <p>Hola ${usuario.nombre}, hemos recopilado tu información.</p>
-      <ul>
-        <li><strong>Email:</strong> ${usuario.email}</li>
-        <li><strong>Rol:</strong> ${usuario.rol}</li>
-        <li><strong>Matchmaking:</strong> ${usuario.permitirMatchmaking ? 'Permitido' : 'No permitido'}</li>
-        <li><strong>Fecha de Registro:</strong> ${usuario.fechaRegistro}</li>
-      </ul>
-      <p>Para ver todas tus transacciones, puedes entrar a la plataforma y descargar tu historial.</p>
-    `;
+    // 3. Formatear datos para la plantilla
+    const datosArco = {
+      nombre: usuario.nombre,
+      email: usuario.email,
+      rol: usuario.rol,
+      permitirMatchmaking: usuario.permitirMatchmaking,
+      fechaRegistro: usuario.fechaRegistro.toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+    };
 
-    // Llamamos a MailService
-    await this.mailService.enviarDatosArco(usuario.email, html);
+    // 4. Enviar correo usando el MailService
+    await this.mailService.enviarDatosArco(usuario.email, datosArco);
   }
 
   async oposicion(usuarioId: string, permitirMatchmaking: boolean): Promise<void> {
