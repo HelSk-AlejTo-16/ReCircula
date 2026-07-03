@@ -171,6 +171,7 @@ export class IdentityController {
 
   // ── RF-08  Rectificar perfil propio ────────────────────────────────────────
   @Patch('me')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'RF-08 — Actualizar datos del usuario autenticado (Rectificación)',
