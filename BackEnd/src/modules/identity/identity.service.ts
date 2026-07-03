@@ -50,6 +50,7 @@ export class IdentityService {
       email: dto.email,
       passwordHash,
       rol: dto.rol,
+      aceptaTransferenciasTerceros: dto.aceptaTransferenciasTerceros,
       emailVerificado: false,
       activo: false, // inactivo hasta verificar correo
     });
@@ -212,6 +213,20 @@ export class IdentityService {
     return {
       mensaje: 'Contraseña actualizada. Inicia sesión con tu nueva contraseña.',
     };
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // RF-08  Rectificación de perfil
+  // ────────────────────────────────────────────────────────────────────────────
+  async actualizarPerfil(usuarioId: string, data: { nombre?: string; email?: string }) {
+    if (data.email) {
+      const existe = await this.usuarios.findByEmail(data.email);
+      if (existe && existe.id !== usuarioId) {
+        throw new ConflictException('El correo electrónico ya está en uso por otra cuenta.');
+      }
+    }
+    await this.usuarios.actualizarPorId(usuarioId, data);
+    return { message: 'Perfil actualizado correctamente.' };
   }
 
   // ────────────────────────────────────────────────────────────────────────────

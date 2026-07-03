@@ -21,7 +21,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { randomUUID } from 'crypto';
 import { ReputationService } from './reputation.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Public } from '../../common/decorators/public.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -46,7 +46,6 @@ export class ReputationController {
   // ── RF-06.1 — Calificaciones ────────────────────────────────────────────────
 
   @Post('calificaciones')
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'RF-06.1 — Calificar a la contraparte al completar un intercambio',
@@ -58,18 +57,16 @@ export class ReputationController {
     return this.svc.calificar(dto, user.id);
   }
 
+  @Public()
   @Get('calificaciones/:usuarioId')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'RF-06.1 — Obtener calificaciones recibidas por un usuario',
-  })
+  @ApiOperation({ summary: 'RF-06.1 — Obtener calificaciones recibidas por un usuario' })
   async getCalificaciones(@Param('usuarioId') usuarioId: string) {
     return this.svc.getCalificaciones(usuarioId);
   }
 
   // ── RF-06.3 — Perfil Reparador ──────────────────────────────────────────────
 
+  @Public()
   @Get('reparadores/:id/perfil')
   @ApiOperation({
     summary: 'RF-06.3 — Perfil público de un reparador verificado',
@@ -83,7 +80,7 @@ export class ReputationController {
   // ── RF-06.2 — Solicitud de verificación ────────────────────────────────────
 
   @Post('verificacion/solicitar')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Roles(RolUsuario.REPARADOR_VERIFICADO)
   @ApiBearerAuth()
   @UseInterceptors(
@@ -117,7 +114,7 @@ export class ReputationController {
   }
 
   @Get('verificacion/pendientes')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMINISTRADOR)
   @ApiBearerAuth()
   @ApiOperation({
@@ -129,7 +126,7 @@ export class ReputationController {
   }
 
   @Patch('verificacion/:id/revisar')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMINISTRADOR)
   @ApiBearerAuth()
   @ApiOperation({

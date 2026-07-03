@@ -145,7 +145,7 @@ function App() {
 
   const getImageUrl = (url: string) => {
     if (url.startsWith('http')) return url
-    return `http://localhost:3000${url}`
+    return `${url}`
   }
 
   return (
@@ -233,7 +233,8 @@ function App() {
             </button>
           )}
 
-          <NotificationBell token={token} />
+          {/* Campanita de Notificaciones */}
+          {token && <NotificationBell token={token} />}
 
           {/* Logout */}
           <button

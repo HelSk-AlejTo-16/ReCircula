@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { MatchmakingService } from './matchmaking.service';
 import { BuscarPublicacionesDto } from './dto/buscar-publicaciones.dto';
 import { MatchmakingReparadoresDto } from './dto/matchmaking-reparadores.dto';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Matchmaking — RF-03')
 @Controller('matchmaking')
@@ -10,6 +11,7 @@ export class MatchmakingController {
   constructor(private readonly svc: MatchmakingService) {}
 
   // ── RF-03.1 + RF-03.2 ────────────────────────────────────────────────────
+  @Public()
   @Get('publicaciones')
   @ApiOperation({
     summary: 'RF-03.1 / RF-03.2 — Publicaciones por proximidad y filtros',
@@ -46,6 +48,7 @@ export class MatchmakingController {
   }
 
   // ── RF-03.3 ───────────────────────────────────────────────────────────────
+  @Public()
   @Get('reparadores')
   @ApiOperation({
     summary: 'RF-03.3 — Reparadores Verificados cercanos para una categoría',

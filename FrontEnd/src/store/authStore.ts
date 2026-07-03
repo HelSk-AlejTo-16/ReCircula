@@ -44,17 +44,17 @@ const loadToken = (): string | null => localStorage.getItem('rc_token');
 export const useAuthStore = create<AuthState>((set) => ({
   user: loadUser(),
   token: loadToken(),
-  isAuthenticated: Boolean(loadToken()),
+  isAuthenticated: Boolean(loadUser() && loadToken()),
 
   setSession: (user, token) => {
-    localStorage.setItem('rc_token', token);
     localStorage.setItem('rc_user', JSON.stringify(user));
+    localStorage.setItem('rc_token', token);
     set({ user, token, isAuthenticated: true });
   },
 
   clearSession: () => {
-    localStorage.removeItem('rc_token');
     localStorage.removeItem('rc_user');
+    localStorage.removeItem('rc_token');
     set({ user: null, token: null, isAuthenticated: false });
   },
 }));

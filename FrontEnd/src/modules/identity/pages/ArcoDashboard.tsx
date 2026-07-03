@@ -2,12 +2,17 @@ import { useState } from 'react';
 import { Shield, Download, FileEdit, UserX, AlertTriangle, EyeOff, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
 import { arcoService } from '../services/arco.service';
+import { updateProfile } from '../services/identity.service';
 
 export default function ArcoDashboard() {
-  const { token, user, clearSession } = useAuthStore();
+  const { token, user, setSession, clearSession } = useAuthStore();
   const [loadingAcceso, setLoadingAcceso] = useState(false);
   const [loadingOposicion, setLoadingOposicion] = useState(false);
   const [loadingCancelacion, setLoadingCancelacion] = useState(false);
+  const [loadingRectificacion, setLoadingRectificacion] = useState(false);
+  const [isEditingPerfil, setIsEditingPerfil] = useState(false);
+  const [editNombre, setEditNombre] = useState(user?.nombre || '');
+  const [editEmail, setEditEmail] = useState(user?.email || '');
   const [mensaje, setMensaje] = useState<{ texto: string; tipo: 'success' | 'error' } | null>(null);
   
   // Asumimos true por defecto, o false si no existe la propiedad.
@@ -32,15 +37,37 @@ export default function ArcoDashboard() {
   const handleOposicion = async () => {
     setLoadingOposicion(true);
     setMensaje(null);
+    const nuevoValor = !permitirMatchmaking;
     try {
-      const newVal = !permitirMatchmaking;
-      const res = await arcoService.oponerMatchmaking(token, newVal);
-      setPermitirMatchmaking(newVal);
+      const res = await arcoService.oponerMatchmaking(token, nuevoValor);
+      setPermitirMatchmaking(nuevoValor);
       setMensaje({ texto: res.message, tipo: 'success' });
     } catch (err: any) {
       setMensaje({ texto: err.message, tipo: 'error' });
     } finally {
       setLoadingOposicion(false);
+    }
+  };
+
+  const handleRectificacion = async () => {
+    if (!editNombre.trim() || !editEmail.trim()) {
+      setMensaje({ texto: 'Los campos no pueden estar vacíos.', tipo: 'error' });
+      return;
+    }
+    setLoadingRectificacion(true);
+    setMensaje(null);
+    try {
+      const res = await updateProfile({ nombre: editNombre, email: editEmail });
+      setMensaje({ texto: res.mensaje, tipo: 'success' });
+      setIsEditingPerfil(false);
+      // Actualizar sesión local
+      if (token && user) {
+        setSession({ ...user, nombre: editNombre, email: editEmail }, token);
+      }
+    } catch (err: any) {
+      setMensaje({ texto: err.message, tipo: 'error' });
+    } finally {
+      setLoadingRectificacion(false);
     }
   };
 
@@ -116,15 +143,52 @@ export default function ArcoDashboard() {
             <h3 style={{ fontSize: '1.1rem', fontWeight: '600' }}>Derecho de Rectificación</h3>
           </div>
           <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1rem' }}>
-            Si tus datos son inexactos o están incompletos, puedes modificarlos directamente desde la configuración de tu perfil.
+            Si tus datos son inexactos o están incompletos, puedes modificarlos directamente aquí.
           </p>
-          <button 
-            onClick={() => alert('Para rectificar tus datos, edita tu información en la sección de "Mi Perfil".')}
-            className="btn-secondary"
-            style={{ width: 'fit-content' }}
-          >
-            Modificar mi perfil
-          </button>
+          {isEditingPerfil ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input
+                type="text"
+                value={editNombre}
+                onChange={(e) => setEditNombre(e.target.value)}
+                placeholder="Tu nombre completo"
+                style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', width: '100%', maxWidth: '300px' }}
+              />
+              <input
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="Tu correo electrónico"
+                style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', width: '100%', maxWidth: '300px' }}
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button 
+                  onClick={handleRectificacion}
+                  disabled={loadingRectificacion}
+                  className="btn-primary"
+                  style={{ width: 'fit-content' }}
+                >
+                  {loadingRectificacion ? <Loader2 size={16} className="animate-spin" /> : 'Guardar cambios'}
+                </button>
+                <button 
+                  onClick={() => { setIsEditingPerfil(false); setEditNombre(user.nombre); setEditEmail(user.email); }}
+                  disabled={loadingRectificacion}
+                  className="btn-secondary"
+                  style={{ width: 'fit-content', backgroundColor: '#f3f4f6', color: '#374151' }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setIsEditingPerfil(true)}
+              className="btn-secondary"
+              style={{ width: 'fit-content' }}
+            >
+              Modificar mi perfil
+            </button>
+          )}
         </div>
 
         {/* Derecho de Oposición */}
