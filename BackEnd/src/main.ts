@@ -10,6 +10,9 @@ import compression from 'compression';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // ── OWASP: Helmet (Cabeceras de Seguridad HSTS, XSS, etc) ───────────────
+  app.use(helmet());
+
   // ── Prefijo global ────────────────────────────────────────────────────────
   app.setGlobalPrefix('api/v1');
 
