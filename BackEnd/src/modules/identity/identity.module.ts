@@ -18,6 +18,7 @@ import { TokenRecuperacionRepository } from './repositories/token-recuperacion.r
 import { IdentityService } from './identity.service';
 import { MailService } from './mail.service';
 import { JwtStrategy } from './jwt.strategy';
+import { DataLifecycleService } from './data-lifecycle.service';
 
 // Controlador
 import { IdentityController } from './identity.controller';
@@ -50,6 +51,7 @@ import { IdentityController } from './identity.controller';
     MailService,
     // Estrategia Passport-JWT
     JwtStrategy,
+    DataLifecycleService,
   ],
   exports: [
     // Exportamos JwtModule y el service para que otros módulos puedan
@@ -58,6 +60,7 @@ import { IdentityController } from './identity.controller';
     IdentityService,
     MailService,
     UsuarioRepository,
+    DataLifecycleService,
   ],
 })
 export class IdentityModule {}

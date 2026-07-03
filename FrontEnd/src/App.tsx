@@ -31,7 +31,7 @@ const CATEGORIAS = [
 ]
 
 function App() {
-  const { user, clearSession } = useAuthStore()
+  const { user, token, clearSession } = useAuthStore()
   const rol = user?.rol || 'USUARIO_GENERAL'
 
   const [view, setView] = useState<'list' | 'create' | 'details' | 'edit' | 'tratos' | 'reparadores' | 'perfil-reparador' | 'solicitar-verificacion' | 'arco'>('list')
@@ -232,6 +232,9 @@ function App() {
               <Plus size={18} /> Publicar
             </button>
           )}
+
+          {/* Campanita de Notificaciones */}
+          {token && <NotificationBell token={token} />}
 
           {/* Logout */}
           <button

@@ -14,7 +14,7 @@ export function useLogin() {
     setLoading(true);
     setError(null);
     try {
-      const { token, usuario } = await loginService(payload);
+      const { usuario, token } = await loginService(payload);
       setSession(usuario, token);
 
       // Redirige según rol

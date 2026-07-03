@@ -19,7 +19,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly identityService: IdentityService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        ExtractJwt.fromUrlQueryParameter('token'),
+      ]),
       ignoreExpiration: false,
       secretOrKey: config.get<string>('jwt.secret', 'secreto-dev'),
       passReqToCallback: true, // necesitamos la req para leer el token crudo
@@ -28,10 +31,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(req: Request, payload: JwtPayload) {
     // Extraemos el token crudo para verificar en BD si fue invalidado (RF-01.5)
-    const tokenPlano = (req.headers['authorization'] ?? '').replace(
-      'Bearer ',
-      '',
-    );
+    let tokenPlano = '';
+    if (req.headers['authorization']) {
+      tokenPlano = req.headers['authorization'].replace('Bearer ', '');
+    } else if (req.query?.token) {
+      tokenPlano = req.query.token as string;
+    }
     const tokenHash = crypto
       .createHash('sha256')
       .update(tokenPlano)

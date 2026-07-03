@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { verifyEmail } from '../services/identity.service';
 import { extractErrorMessage } from '../../../shared/utils/extractErrorMessage';
@@ -85,9 +85,12 @@ export function VerifyEmailPage() {
   const token = searchParams.get('token');
   const [status, setStatus] = useState<Status>(token ? 'loading' : 'missing');
   const [errorMsg, setErrorMsg] = useState('');
+  const hasAttempted = useRef(false);
 
   useEffect(() => {
     if (!token) return;
+    if (hasAttempted.current) return;
+    hasAttempted.current = true;
 
     verifyEmail(token)
       .then(() => setStatus('success'))

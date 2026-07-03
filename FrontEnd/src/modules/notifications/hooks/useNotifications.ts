@@ -1,19 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  API_BASE,
 } from '../api';
 import type { Notificacion } from '../api';
-
-const POLLING_INTERVAL_MS = 30_000; // 30 segundos
 
 export function useNotifications(token: string | null) {
   const [notifications, setNotifications] = useState<Notificacion[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
 
   const fetchAll = useCallback(async () => {
     if (!token) return;
@@ -51,16 +50,33 @@ export function useNotifications(token: string | null) {
     setUnreadCount(0);
   }, [token]);
 
-  // Carga inicial y polling cada 30 segundos
+  // Carga inicial y suscripción SSE (Latencia <= 2s)
   useEffect(() => {
     if (!token) return;
 
     fetchAll();
 
-    intervalRef.current = setInterval(fetchAll, POLLING_INTERVAL_MS);
+    const url = `${API_BASE}/notifications/stream?token=${token}`;
+    const eventSource = new EventSource(url);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const nuevaNotificacion = JSON.parse(event.data);
+        if (nuevaNotificacion.type === 'ping') return;
+        setNotifications((prev) => [nuevaNotificacion, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+      } catch (err) {
+        console.error('Error parseando notificación SSE', err);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('Error en SSE:', err);
+      // El navegador intentará reconectar automáticamente al fallar
+    };
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      eventSource.close();
     };
   }, [token, fetchAll]);
 

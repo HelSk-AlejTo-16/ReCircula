@@ -130,10 +130,12 @@ export function RegisterPage() {
   const [password, setPassword] = useState('');
   const [rol,      setRol]      = useState<Rol>('USUARIO_GENERAL');
   const [focused,  setFocused]  = useState<string | null>(null);
+  const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false);
+  const [aceptaTransferencias, setAceptaTransferencias] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    register({ nombre, email, password, rol });
+    register({ nombre, email, password, rol, aceptaTransferenciasTerceros: aceptaTransferencias });
   };
 
   const inputStyle = (field: string) => ({
@@ -265,9 +267,41 @@ export function RegisterPage() {
             <p style={s.hint}>Usa al menos 8 caracteres con letras y números.</p>
           </div>
 
+          {/* ── Aviso de Privacidad ──────────────────────────────────────────── */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
+            <input
+              type="checkbox"
+              id="privacidad"
+              checked={aceptaPrivacidad}
+              onChange={(e) => setAceptaPrivacidad(e.target.checked)}
+              style={{ marginTop: '3px' }}
+            />
+            <label htmlFor="privacidad" style={{ fontSize: '12px', color: '#6B6B6B', lineHeight: '1.4' }}>
+              He leído y acepto el{' '}
+              <Link to="/aviso-privacidad" target="_blank" style={s.footerLink}>
+                Aviso de Privacidad Integral
+              </Link>{' '}
+              para el tratamiento de mis datos personales.
+            </label>
+          </div>
+
+          {/* ── Consentimiento Transferencia Terceros ──────────────────────── */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '20px' }}>
+            <input
+              type="checkbox"
+              id="transferencias"
+              checked={aceptaTransferencias}
+              onChange={(e) => setAceptaTransferencias(e.target.checked)}
+              style={{ marginTop: '3px' }}
+            />
+            <label htmlFor="transferencias" style={{ fontSize: '12px', color: '#6B6B6B', lineHeight: '1.4' }}>
+              Consiento expresamente la transferencia de mis datos a terceros (proveedores de servicios, pasarelas de pago o correos) cuando sea necesario.
+            </label>
+          </div>
+
           <button
-            type="submit" disabled={loading}
-            style={{ ...s.button, ...(loading ? s.buttonDisabled : {}) }}
+            type="submit" disabled={loading || !aceptaPrivacidad || !aceptaTransferencias}
+            style={{ ...s.button, ...((loading || !aceptaPrivacidad || !aceptaTransferencias) ? s.buttonDisabled : {}) }}
           >
             {loading
               ? 'Creando cuenta…'

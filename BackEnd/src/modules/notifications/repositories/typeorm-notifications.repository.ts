@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Notification } from '../entities/notification.entity';
 import { NotificationsRepository } from './notifications.repository';
 import { TipoNotificacion } from '../../../common/types';
@@ -10,6 +11,7 @@ export class TypeOrmNotificationsRepository implements NotificationsRepository {
   constructor(
     @InjectRepository(Notification)
     private readonly repo: Repository<Notification>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async crear(datos: {
@@ -30,7 +32,12 @@ export class TypeOrmNotificationsRepository implements NotificationsRepository {
       leida: false,
       fechaLectura: null,
     });
-    return this.repo.save(notif);
+    const saved = await this.repo.save(notif);
+    
+    // Emitimos el evento para SSE
+    this.eventEmitter.emit('notification.created', saved);
+    
+    return saved;
   }
 
   async obtenerParaUsuario(usuarioId: string): Promise<Notification[]> {

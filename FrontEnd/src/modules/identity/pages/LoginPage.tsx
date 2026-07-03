@@ -272,6 +272,12 @@ export function LoginPage() {
             Regístrate gratis
           </Link>
         </p>
+        <p style={{ ...styles.footer, marginTop: '12px', fontSize: '12px' }}>
+          Al iniciar sesión aceptas nuestro{' '}
+          <Link to="/aviso-privacidad" target="_blank" style={{ ...styles.footerLink, color: '#6B6B6B', textDecoration: 'underline' }}>
+            Aviso de Privacidad
+          </Link>
+        </p>
       </div>
     </div>
   );

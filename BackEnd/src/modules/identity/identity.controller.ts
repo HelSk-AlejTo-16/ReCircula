@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Body,
   Query,
   HttpCode,
@@ -9,18 +10,18 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import {
   ApiTags,
   ApiOperation,
-  ApiBearerAuth,
   ApiOkResponse,
   ApiCreatedResponse,
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiQuery,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
 
 import { IdentityService } from './identity.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -33,6 +34,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @ApiTags('Identity — RF-01')
 @Controller('identity')
@@ -52,8 +54,7 @@ export class IdentityController {
   })
   @ApiConflictResponse({ description: 'El email ya está en uso.' })
   registrar(@Body() dto: RegisterDto) {
-    // 👇 1. Quitamos @Req()
-    return this.svc.registrar(dto); // 👇 2. Le pasamos solo el DTO
+    return this.svc.registrar(dto);
   }
 
   // ── RF-01.1  Verificar email ──────────────────────────────────────────────
@@ -100,8 +101,13 @@ export class IdentityController {
     description:
       'Credenciales inválidas / email no verificado / cuenta inactiva.',
   })
-  login(@Body() dto: LoginDto, @Req() req: Request) {
-    return this.svc.login(dto, req.ip);
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+  ) {
+    const { usuario, token } = await this.svc.login(dto, req.ip);
+    
+    return { usuario, token };
   }
 
   // ── RF-01.3  Solicitar recuperación ──────────────────────────────────────
@@ -149,7 +155,6 @@ export class IdentityController {
   }
 
   // ── RF-01.4  Perfil propio (diferenciado por rol) ────────────────────────
-  // ── RF-01.4  Perfil propio (diferenciado por rol) ────────────────────────
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -158,6 +163,21 @@ export class IdentityController {
   })
   me(@CurrentUser() user: { id: string; email: string; rol: string }) {
     return user;
+  }
+
+  // ── RF-08  Rectificar perfil propio ────────────────────────────────────────
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'RF-08 — Actualizar datos del usuario autenticado (Rectificación)',
+  })
+  @ApiOkResponse({ description: 'Perfil actualizado correctamente.' })
+  actualizarPerfil(
+    @CurrentUser() user: { id: string },
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.svc.actualizarPerfil(user.id, dto);
   }
 
   // ── RF-01.4  Endpoint exclusivo de ADMINISTRADOR ──────────────────

@@ -25,7 +25,7 @@ export class HistoryController {
 
   @Post('publication/:publicationId/repair')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.VENDEDOR_REPARADOR)
+  @Roles(RolUsuario.REPARADOR_VERIFICADO)
   async addRepair(
     @Param('publicationId') publicationId: string,
     @CurrentUser() user: { id: string },

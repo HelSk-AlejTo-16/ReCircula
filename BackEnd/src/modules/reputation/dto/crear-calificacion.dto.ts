@@ -1,5 +1,4 @@
 import {
-  IsUUID,
   IsInt,
   Min,
   Max,
@@ -10,8 +9,8 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CrearCalificacionDto {
-  @ApiProperty({ description: 'UUID de la transacción completada que se califica' })
-  @IsUUID()
+  @ApiProperty({ description: 'ID de la transacción completada que se califica' })
+  @IsString()
   transaccionId: string;
 
   @ApiProperty({ description: 'Puntuación del 1 al 5', minimum: 1, maximum: 5 })

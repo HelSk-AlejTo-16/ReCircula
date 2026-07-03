@@ -8,6 +8,12 @@ export interface RegisterPayload {
   email: string;
   password: string;
   rol: 'USUARIO_GENERAL' | 'REPARADOR_VERIFICADO';
+  aceptaTransferenciasTerceros: boolean;
+}
+
+export interface UpdateProfilePayload {
+  nombre?: string;
+  email?: string;
 }
 
 export interface LoginPayload {
@@ -60,9 +66,12 @@ export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
   const data = await axiosClient
     .post<{ usuario: AuthUser; token: string }>('/identity/login', payload)
     .then((r) => r.data);
-  // El backend devuelve { usuario, token } — lo normalizamos a { usuario, accessToken }
-  return { usuario: data.usuario, accessToken: data.token };
+  return { usuario: data.usuario, token: data.token };
 };
+
+/** RF-08 — Rectificar perfil */
+export const updateProfile = (payload: UpdateProfilePayload) =>
+  axiosClient.patch<MessageResponse>('/identity/me', payload).then((r) => r.data);
 
 /** RF-01.3 — Solicitar enlace de recuperación de contraseña */
 export const forgotPassword = (payload: ForgotPasswordPayload) =>

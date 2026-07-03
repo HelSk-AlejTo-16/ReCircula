@@ -16,6 +16,8 @@ export class MailService {
         user: config.get<string>('mail.user'),
         pass: config.get<string>('mail.pass'),
       },
+      logger: true, // Imprime la conexión en consola (demostración de seguridad)
+      debug: true,  // Imprime el handshake SMTP y TLS
     });
   }
 
@@ -25,8 +27,8 @@ export class MailService {
     nombre: string,
     token: string,
   ): Promise<void> {
-    const appUrl = this.config.get<string>('mail.appUrl');
-    const enlace = `${appUrl}/api/v1/identity/verify-email?token=${token}`;
+    const frontUrl = 'http://localhost:5173'; // Redirigir al Frontend
+    const enlace = `${frontUrl}/verify-email?token=${token}`;
     await this.send(
       to,
       'Verifica tu cuenta en ReCircula',
@@ -40,8 +42,8 @@ export class MailService {
     nombre: string,
     token: string,
   ): Promise<void> {
-    const appUrl = this.config.get<string>('mail.appUrl');
-    const enlace = `${appUrl}/api/v1/identity/reset-password?token=${token}`;
+    const frontUrl = 'http://localhost:5173'; // Redirigir al Frontend
+    const enlace = `${frontUrl}/reset-password?token=${token}`;
     await this.send(
       to,
       'Recupera tu contraseña de ReCircula',
@@ -50,8 +52,8 @@ export class MailService {
   }
 
   // ── RF-08 ───────────────────────────────────────────────────────────────
-  async enviarDatosArco(to: string, htmlContent: string): Promise<void> {
-    await this.send(to, 'Tus datos personales (Derecho de Acceso ARCO)', htmlContent);
+  async enviarDatosArco(to: string, usuario: any): Promise<void> {
+    await this.send(to, 'Tus datos personales (Derecho de Acceso ARCO)', this.tplDatosArco(usuario));
   }
 
   private async send(to: string, subject: string, html: string): Promise<void> {
@@ -72,6 +74,7 @@ export class MailService {
       this.logger.error(`Error enviando correo a ${to}`, err);
     }
   }
+
   private tplVerificacion(nombre: string, enlace: string): string {
     return `<!DOCTYPE html><html lang="es"><body
       style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px;color:#2C2C2A">
@@ -96,6 +99,22 @@ export class MailService {
         Restablecer contraseña
       </a>
       <p style="color:#888;font-size:13px">El enlace expira en <strong>60 minutos</strong>.</p>
+      <p style="color:#aaa;font-size:12px">ReCircula · Economía circular de tecnología</p>
+    </body></html>`;
+  }
+
+  private tplDatosArco(usuario: any): string {
+    return `<!DOCTYPE html><html lang="es"><body
+      style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px;color:#2C2C2A">
+      <h2 style="color:#2D6A4F">Tus datos personales, ${usuario.nombre}</h2>
+      <p>Hemos recopilado la información asociada a tu cuenta (Derecho de Acceso ARCO):</p>
+      <ul style="background:#f4f4f4;padding:20px;border-radius:8px;list-style:none;margin:24px 0;line-height:1.6">
+        <li style="margin-bottom:8px"><strong>Email:</strong> ${usuario.email}</li>
+        <li style="margin-bottom:8px"><strong>Rol:</strong> ${usuario.rol}</li>
+        <li style="margin-bottom:8px"><strong>Matchmaking:</strong> ${usuario.permitirMatchmaking ? 'Permitido' : 'No permitido'}</li>
+        <li><strong>Fecha de Registro:</strong> ${usuario.fechaRegistro}</li>
+      </ul>
+      <p style="color:#888;font-size:13px">Para ver todas tus transacciones, puedes entrar a la plataforma y descargar tu historial.</p>
       <p style="color:#aaa;font-size:12px">ReCircula · Economía circular de tecnología</p>
     </body></html>`;
   }

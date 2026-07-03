@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import mailConfig from './config/mail.config';
@@ -13,8 +15,7 @@ import { HistoryModule } from './modules/history/history.module';
 
 import { MatchmakingModule }    from './modules/matchmaking/matchmaking.module';
 import { ReputationModule }     from './modules/reputation/reputation.module';
-// import { HistoryModule }        from './modules/history/history.module';
-// import { NotificationsModule }  from './modules/notifications/notifications.module';
+import { NotificationsModule }  from './modules/notifications/notifications.module';
 import { ArcoModule } from './modules/arco/arco.module';
 
 @Module({
@@ -24,6 +25,12 @@ import { ArcoModule } from './modules/arco/arco.module';
       isGlobal: true,
       load: [databaseConfig, jwtConfig, mailConfig],
     }),
+
+    // ── Tareas programadas (Cron Jobs) ───────────────────────────────────────
+    ScheduleModule.forRoot(),
+
+    // ── Eventos internos (SSE) ──────────────────────────────────────────────
+    EventEmitterModule.forRoot(),
 
     // ── TypeORM conectado a PostgreSQL (schema ya existente) ─────────────────
     TypeOrmModule.forRootAsync({
@@ -52,6 +59,9 @@ import { ArcoModule } from './modules/arco/arco.module';
 
     // ── RF-06: Calificación y reputación ─────────────────────────────────────
     ReputationModule,
+
+    // ── RF-07: Notificaciones ────────────────────────────────────────────────
+    NotificationsModule,
 
     // ── RF-08: Derechos ARCO del Usuario ─────────────────────────────────────
     ArcoModule,
