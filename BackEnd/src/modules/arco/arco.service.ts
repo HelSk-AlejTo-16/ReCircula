@@ -35,10 +35,13 @@ export class ArcoService {
     await this.mailService.enviarDatosArco(usuario.email, datosArco);
   }
 
-  async oposicion(usuarioId: string, permitirMatchmaking: boolean): Promise<void> {
+  async oposicion(
+    usuarioId: string,
+    permitirMatchmaking: boolean,
+  ): Promise<void> {
     const usuario = await this.usuarioRepo.findById(usuarioId);
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
-    
+
     await this.usuarioRepo.actualizarPorId(usuarioId, { permitirMatchmaking });
   }
 

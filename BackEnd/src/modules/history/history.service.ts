@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { HistoryRepository } from './repositories/history.repository';
 import { PublicationsRepository } from '../publications/repositories/publications.repository';
 import { ProductHistory } from './entities/product-history.entity';
@@ -16,14 +20,17 @@ export class HistoryService {
     private readonly entityManager: EntityManager,
   ) {}
 
-  async getHistoryByPublicationId(publicationId: string): Promise<ProductHistory> {
+  async getHistoryByPublicationId(
+    publicationId: string,
+  ): Promise<ProductHistory> {
     const pub = await this.publicationsRepo.findById(publicationId);
     if (!pub) {
       throw new NotFoundException('La publicación especificada no existe');
     }
 
     // Create the history if it doesn't exist yet
-    let history = await this.historyRepo.findHistoryByPublicationId(publicationId);
+    let history =
+      await this.historyRepo.findHistoryByPublicationId(publicationId);
     if (!history) {
       history = await this.historyRepo.createHistory(publicationId);
       history.entradas = [];
@@ -44,14 +51,17 @@ export class HistoryService {
     // Look up if either user has VENDEDOR_REPARADOR role to set as reparadorId
     let reparadorId: string | null = null;
     try {
-      const users = await this.entityManager.createQueryBuilder(Usuario, 'u')
+      const users = await this.entityManager
+        .createQueryBuilder(Usuario, 'u')
         .where('u.id IN (:...ids)', { ids: [iniciadorId, receptorId] })
         .getMany();
-      const repairer = users.find((u) => u.rol === RolUsuario.REPARADOR_VERIFICADO);
+      const repairer = users.find(
+        (u) => u.rol === RolUsuario.REPARADOR_VERIFICADO,
+      );
       if (repairer) {
         reparadorId = repairer.id;
       }
-    } catch (err) {
+    } catch {
       // In case user lookup fails, fall back to null
     }
 

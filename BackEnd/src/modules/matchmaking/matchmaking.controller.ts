@@ -1,7 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import {
-  ApiTags, ApiOperation, ApiOkResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { MatchmakingService } from './matchmaking.service';
 import { BuscarPublicacionesDto } from './dto/buscar-publicaciones.dto';
 import { MatchmakingReparadoresDto } from './dto/matchmaking-reparadores.dto';

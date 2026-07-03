@@ -5,6 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   PublicationsRepository,
   FindAllOptions,
@@ -15,7 +16,7 @@ import { Publication } from './entities/publication.entity';
 import { Componente } from './entities/component.entity';
 import { ImagenPublicacion } from './entities/image.entity';
 import { EstadoPublicacion, ModalidadIntercambio } from '../../common/types';
-import { NotificationsService } from '../notifications/notifications.service';
+import { PublicationCreatedEvent } from '../../common/events';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -33,7 +34,7 @@ export class PublicationsService {
   constructor(
     private readonly repo: PublicationsRepository,
     private readonly entityManager: EntityManager,
-    private readonly notificationsService: NotificationsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     // Asegurarse de que el directorio de subidas exista
     if (!fs.existsSync(this.uploadDir)) {
@@ -153,13 +154,15 @@ export class PublicationsService {
 
     const publicacionCreada = await this.repo.create(publicacion);
 
-    // RF-07.3 — Alertar a usuarios con esta categoría como favorita
-    // Se ejecuta en segundo plano para no bloquear la respuesta al publicador
-    this.notificationsService.notificarCategoriaFavorita({
-      publicacionId: publicacionCreada.id,
-      tituloPublicacion: publicacionCreada.titulo,
-      categoria: publicacionCreada.categoria,
-    }).catch((err) => this.logger.error('Error al notificar categoría favorita', err));
+    // Emitir evento de publicación creada (EDA)
+    this.eventEmitter.emit(
+      'publication.created',
+      new PublicationCreatedEvent(
+        publicacionCreada.id,
+        publicacionCreada.titulo,
+        publicacionCreada.categoria,
+      ),
+    );
 
     return publicacionCreada;
   }

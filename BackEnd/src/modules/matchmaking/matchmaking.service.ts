@@ -22,14 +22,14 @@ export class MatchmakingService {
 
     this.logger.log(
       `Búsqueda geoespacial — lat:${dto.latitud} lng:${dto.longitud} radio:${dto.radioKm}km ` +
-      `categoria:${dto.categoria ?? 'todas'} modalidad:${dto.modalidad ?? 'todas'}`,
+        `categoria:${dto.categoria ?? 'todas'} modalidad:${dto.modalidad ?? 'todas'}`,
     );
 
     const resultados = await this.repo.buscarPublicaciones(dto);
 
     return {
-      total:      resultados.length,
-      radioKm:    dto.radioKm ?? 10,
+      total: resultados.length,
+      radioKm: dto.radioKm ?? 10,
       resultados,
     };
   }
@@ -40,14 +40,14 @@ export class MatchmakingService {
   async buscarReparadores(dto: MatchmakingReparadoresDto) {
     this.logger.log(
       `Matchmaking reparadores — lat:${dto.latitud} lng:${dto.longitud} ` +
-      `categoria:${dto.categoria} radio:${dto.radioKm}km`,
+        `categoria:${dto.categoria} radio:${dto.radioKm}km`,
     );
 
     const resultados = await this.repo.buscarReparadores(dto);
 
     return {
-      total:     resultados.length,
-      radioKm:   dto.radioKm ?? 20,
+      total: resultados.length,
+      radioKm: dto.radioKm ?? 20,
       categoria: dto.categoria,
       resultados,
     };

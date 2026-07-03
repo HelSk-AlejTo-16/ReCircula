@@ -6,10 +6,7 @@ import { IdentityModule } from '../identity/identity.module';
 import { Usuario } from '../identity/entities/usuario.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Usuario]),
-    IdentityModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Usuario]), IdentityModule],
   controllers: [ArcoController],
   providers: [ArcoService],
 })

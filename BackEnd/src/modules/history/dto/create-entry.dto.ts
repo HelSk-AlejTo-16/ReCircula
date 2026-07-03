@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, Length } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  Length,
+} from 'class-validator';
 
 export class CreateEntryDto {
   @IsString()

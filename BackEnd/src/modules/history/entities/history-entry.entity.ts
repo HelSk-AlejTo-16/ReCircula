@@ -19,7 +19,9 @@ export class HistoryEntry {
   @Column({ name: 'historial_id', type: 'uuid' })
   historialId: string;
 
-  @ManyToOne(() => ProductHistory, (hist) => hist.entradas, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ProductHistory, (hist) => hist.entradas, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'historial_id' })
   historial: ProductHistory;
 
@@ -43,10 +45,20 @@ export class HistoryEntry {
   @JoinColumn({ name: 'reparador_id' })
   reparador: Usuario | null;
 
-  @Column({ name: 'piezas_reemplazadas', type: 'text', array: true, default: '{}' })
+  @Column({
+    name: 'piezas_reemplazadas',
+    type: 'text',
+    array: true,
+    default: '{}',
+  })
   piezasReemplazadas: string[];
 
-  @Column({ name: 'estado_resultante', type: 'varchar', length: 100, nullable: true })
+  @Column({
+    name: 'estado_resultante',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
   estadoResultante: string | null;
 
   @Column({ name: 'transaccion_id', type: 'uuid', nullable: true })

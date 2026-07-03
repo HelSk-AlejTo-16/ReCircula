@@ -47,7 +47,10 @@ export class TypeOrmNotificationsRepository implements NotificationsRepository {
     });
   }
 
-  async marcarComoLeida(id: string, usuarioId: string): Promise<Notification | null> {
+  async marcarComoLeida(
+    id: string,
+    usuarioId: string,
+  ): Promise<Notification | null> {
     const notif = await this.repo.findOne({
       where: { id, destinatarioId: usuarioId },
     });

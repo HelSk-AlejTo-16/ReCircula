@@ -107,6 +107,7 @@ CREATE TABLE usuarios (
     rol                 rol_usuario  NOT NULL DEFAULT 'USUARIO_GENERAL',
     email_verificado    BOOLEAN      NOT NULL DEFAULT FALSE,
     activo              BOOLEAN      NOT NULL DEFAULT TRUE,
+    permitir_matchmaking BOOLEAN     NOT NULL DEFAULT TRUE,
     fecha_registro      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

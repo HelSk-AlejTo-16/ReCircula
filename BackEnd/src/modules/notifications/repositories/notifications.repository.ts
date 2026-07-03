@@ -13,7 +13,10 @@ export abstract class NotificationsRepository {
 
   abstract obtenerParaUsuario(usuarioId: string): Promise<Notification[]>;
 
-  abstract marcarComoLeida(id: string, usuarioId: string): Promise<Notification | null>;
+  abstract marcarComoLeida(
+    id: string,
+    usuarioId: string,
+  ): Promise<Notification | null>;
 
   abstract marcarTodasComoLeidas(usuarioId: string): Promise<void>;
 

@@ -14,7 +14,9 @@ export class TypeOrmHistoryRepository implements HistoryRepository {
     private readonly entryRepo: Repository<HistoryEntry>,
   ) {}
 
-  async findHistoryByPublicationId(publicationId: string): Promise<ProductHistory | null> {
+  async findHistoryByPublicationId(
+    publicationId: string,
+  ): Promise<ProductHistory | null> {
     const history = await this.historyRepo.findOne({
       where: { publicacionId: publicationId },
       relations: {
@@ -37,7 +39,9 @@ export class TypeOrmHistoryRepository implements HistoryRepository {
 
   async createHistory(publicationId: string): Promise<ProductHistory> {
     // Check if it already exists
-    let history = await this.historyRepo.findOne({ where: { publicacionId: publicationId } });
+    let history = await this.historyRepo.findOne({
+      where: { publicacionId: publicationId },
+    });
     if (!history) {
       history = this.historyRepo.create({ publicacionId: publicationId });
       history = await this.historyRepo.save(history);

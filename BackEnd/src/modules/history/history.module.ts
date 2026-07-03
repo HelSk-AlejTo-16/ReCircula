@@ -8,6 +8,8 @@ import { HistoryRepository } from './repositories/history.repository';
 import { TypeOrmHistoryRepository } from './repositories/typeorm-history.repository';
 import { PublicationsModule } from '../publications/publications.module';
 
+import { HistoryListener } from './history.listener';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProductHistory, HistoryEntry]),
@@ -16,6 +18,7 @@ import { PublicationsModule } from '../publications/publications.module';
   controllers: [HistoryController],
   providers: [
     HistoryService,
+    HistoryListener,
     {
       provide: HistoryRepository,
       useClass: TypeOrmHistoryRepository,

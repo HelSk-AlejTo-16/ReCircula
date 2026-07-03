@@ -19,7 +19,9 @@ export class CrearCalificacionDto {
   @Max(5)
   puntuacion: number;
 
-  @ApiPropertyOptional({ description: 'Comentario opcional (máx. 500 caracteres)' })
+  @ApiPropertyOptional({
+    description: 'Comentario opcional (máx. 500 caracteres)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)
