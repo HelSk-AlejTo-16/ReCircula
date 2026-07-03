@@ -14,6 +14,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuario } from '../identity/entities/usuario.entity';
 import { SolicitudVerificacion } from './entities/solicitud-verificacion.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ReputationService {
@@ -22,6 +23,7 @@ export class ReputationService {
     private readonly txRepo: TransactionsRepository,
     @InjectRepository(Usuario)
     private readonly usuariosRepo: Repository<Usuario>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // ── RF-06.1 — Calificar contraparte ────────────────────────────────────────
@@ -60,13 +62,28 @@ export class ReputationService {
     const calificadoId =
       tx.iniciadorId === calificadorId ? tx.receptorId : tx.iniciadorId;
 
-    return this.repo.crearCalificacion({
+    const calificacion = await this.repo.crearCalificacion({
       transaccionId: dto.transaccionId,
       calificadorId,
       calificadoId,
       puntuacion: dto.puntuacion,
       comentario: dto.comentario ?? null,
     });
+
+    try {
+      const calificador = await this.usuariosRepo.findOne({ where: { id: calificadorId } });
+      await this.notificationsService.notificarCalificacionRecibida({
+        destinatarioId: calificadoId,
+        calificadorNombre: calificador?.nombre ?? 'Un usuario',
+        puntuacion: dto.puntuacion,
+        transaccionId: dto.transaccionId,
+      });
+    } catch (err) {
+      // Registrar error de notificación sin bloquear la respuesta de la calificación
+      console.error('Error al enviar notificación de calificación', err);
+    }
+
+    return calificacion;
   }
 
   // ── Listar calificaciones recibidas por un usuario ─────────────────────────
@@ -107,7 +124,7 @@ export class ReputationService {
     // Mapear archivos a URLs relativas (multer ya los guardó en /uploads/verificacion/)
     const evidencias = files.map((f) => `/uploads/verificacion/${f.filename}`);
 
-    return this.repo.crearSolicitudVerificacion({
+    const solicitud = await this.repo.crearSolicitudVerificacion({
       reparadorId,
       estado: EstadoVerificacion.PENDIENTE,
       evidencias,
@@ -115,6 +132,17 @@ export class ReputationService {
       notasAdmin: null,
       revisadoPorId: null,
     });
+
+    try {
+      await this.notificationsService.notificarSolicitudVerificacion({
+        reparadorNombre: usuario.nombre,
+        solicitudId: solicitud.id,
+      });
+    } catch (err) {
+      console.error('Error al notificar solicitud de verificación', err);
+    }
+
+    return solicitud;
   }
 
   // ── RF-06.2 — Listar solicitudes pendientes (ADMIN) ────────────────────────
@@ -148,6 +176,17 @@ export class ReputationService {
 
     // Si se aprueba, no cambiamos el rol automáticamente en esta versión.
     // El ADMIN lo hará manualmente o en un sprint posterior.
+
+    try {
+      await this.notificationsService.notificarVerificacionRevisada({
+        reparadorId: actualizada.reparadorId,
+        aprobada: decision === 'APROBADA',
+        notasAdmin: notasAdmin,
+        solicitudId: actualizada.id,
+      });
+    } catch (err) {
+      console.error('Error al notificar resultado de verificación', err);
+    }
 
     return actualizada;
   }
