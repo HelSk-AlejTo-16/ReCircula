@@ -23,10 +23,11 @@ services:
     build:
       context: ./BackEnd
       dockerfile: Dockerfile
-    container_name: recircula_backend
+    # Eliminamos 'container_name' para permitir el escalado horizontal (docker compose up --scale backend=N)
     restart: always
-    ports:
-      - "3000:3000"
+    # No exponemos el puerto 3000 del backend directamente al host para evitar conflictos al escalar
+    expose:
+      - "3000"
     environment:
       - PORT=3000
       - DB_HOST=db
@@ -40,13 +41,22 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      # RNF-02: Chequeo de salud del orquestador. Llama al endpoint de salud /api/v1/health.
-      # Si falla 3 veces (intervalo 10s), docker compose reiniciará o marcará el servicio como unhealthy.
-      # La política 'restart: always' asegura que la instancia caída se reemplace/reinicie automáticamente.
+      # RNF-02 / RNF-04: Chequeo de salud individual por instancia
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/v1/health"]
       interval: 10s
       timeout: 5s
       retries: 3
+
+  load_balancer:
+    image: nginx:alpine
+    container_name: recircula_load_balancer
+    restart: always
+    ports:
+      - "3000:3000" # El balanceador expone la API unificada hacia el exterior
+    volumes:
+      - ./nginx-load-balancer.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
 
   frontend:
     build:
@@ -57,7 +67,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      - load_balancer
 
 volumes:
   pgdata:

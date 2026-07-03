@@ -857,3 +857,26 @@ INSERT INTO categorias_articulo (nombre, descripcion, icono) VALUES
     ('Impresoras y Escáneres',     'Impresoras, cartuchos y escáneres',                        'printer'),
     ('Antigüedades Tecnológicas',  'Equipos vintage y coleccionables tecnológicos',             'clock'),
     ('Otros',                      'Artículos que no encajan en otras categorías',              'package');
+
+-- =============================================================================
+-- 15. ÍNDICES DE RENDIMIENTO (RNF-04 - Escalabilidad)
+-- =============================================================================
+
+-- Índice espacial GiST para búsquedas geoespaciales por radio y coordenadas (catálogo y matchmaking)
+CREATE INDEX IF NOT EXISTS idx_publicaciones_ubicacion ON publicaciones USING GIST (ubicacion);
+
+-- Índice compuesto para búsquedas y filtrados rápidos de artículos activos en el catálogo
+CREATE INDEX IF NOT EXISTS idx_publicaciones_busqueda ON publicaciones (estado, categoria, modalidad);
+
+-- Índice B-Tree para optimizar búsquedas de publicaciones por publicador
+CREATE INDEX IF NOT EXISTS idx_publicaciones_publicador ON publicaciones (publicador_id);
+
+-- Índice espacial GiST para búsquedas de técnicos por ubicación en el mapa
+CREATE INDEX IF NOT EXISTS idx_perfiles_reparador_ubicacion ON perfiles_reparador USING GIST (ubicacion);
+
+-- Índice compuesto para alertas y notificaciones eficientes
+CREATE INDEX IF NOT EXISTS idx_notificaciones_destinatario ON notificaciones (destinatario_id, leida);
+
+-- Índices B-Tree para optimizar auditorías y consultas de tratos/intercambios por usuario
+CREATE INDEX IF NOT EXISTS idx_transacciones_iniciador ON transacciones (iniciador_id);
+CREATE INDEX IF NOT EXISTS idx_transacciones_receptor ON transacciones (receptor_id);
