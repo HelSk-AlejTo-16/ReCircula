@@ -1,6 +1,5 @@
 import { Calificacion } from '../entities/calificacion.entity';
 import { SolicitudVerificacion } from '../entities/solicitud-verificacion.entity';
-import { EstadoVerificacion } from '../../../common/types';
 
 export interface PerfilReparadorResult {
   reparadorId: string;
@@ -14,15 +13,21 @@ export interface PerfilReparadorResult {
 /** Puerto (interfaz abstracta) del repositorio de reputación */
 export abstract class ReputationRepository {
   /** Calificaciones */
-  abstract crearCalificacion(data: Partial<Calificacion>): Promise<Calificacion>;
+  abstract crearCalificacion(
+    data: Partial<Calificacion>,
+  ): Promise<Calificacion>;
   abstract findCalificacionByTxYCalificador(
     transaccionId: string,
     calificadorId: string,
   ): Promise<Calificacion | null>;
-  abstract getCalificacionesDeUsuario(usuarioId: string): Promise<Calificacion[]>;
+  abstract getCalificacionesDeUsuario(
+    usuarioId: string,
+  ): Promise<Calificacion[]>;
 
   /** Perfil reparador (vista DB) */
-  abstract getPerfilReparador(reparadorId: string): Promise<PerfilReparadorResult | null>;
+  abstract getPerfilReparador(
+    reparadorId: string,
+  ): Promise<PerfilReparadorResult | null>;
 
   /** Verificación */
   abstract crearSolicitudVerificacion(

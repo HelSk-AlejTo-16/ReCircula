@@ -10,7 +10,9 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CrearCalificacionDto {
-  @ApiProperty({ description: 'UUID de la transacción completada que se califica' })
+  @ApiProperty({
+    description: 'UUID de la transacción completada que se califica',
+  })
   @IsUUID()
   transaccionId: string;
 
@@ -20,7 +22,9 @@ export class CrearCalificacionDto {
   @Max(5)
   puntuacion: number;
 
-  @ApiPropertyOptional({ description: 'Comentario opcional (máx. 500 caracteres)' })
+  @ApiPropertyOptional({
+    description: 'Comentario opcional (máx. 500 caracteres)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)

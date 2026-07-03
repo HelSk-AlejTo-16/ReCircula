@@ -42,7 +42,12 @@ export class Notification {
   referenciaId: string | null;
 
   /** Tipo del objeto relacionado: 'publicacion' | 'transaccion' | 'calificacion' */
-  @Column({ name: 'referencia_tipo', type: 'varchar', length: 50, nullable: true })
+  @Column({
+    name: 'referencia_tipo',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
   referenciaTipo: string | null;
 
   @CreateDateColumn({ name: 'fecha_creacion', type: 'timestamptz' })

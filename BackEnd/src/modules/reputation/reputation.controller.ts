@@ -61,7 +61,9 @@ export class ReputationController {
   @Get('calificaciones/:usuarioId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'RF-06.1 — Obtener calificaciones recibidas por un usuario' })
+  @ApiOperation({
+    summary: 'RF-06.1 — Obtener calificaciones recibidas por un usuario',
+  })
   async getCalificaciones(@Param('usuarioId') usuarioId: string) {
     return this.svc.getCalificaciones(usuarioId);
   }
@@ -89,7 +91,8 @@ export class ReputationController {
   )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'Descripción + hasta 10 imágenes de evidencia (campo "evidencias")',
+    description:
+      'Descripción + hasta 10 imágenes de evidencia (campo "evidencias")',
     schema: {
       type: 'object',
       properties: {
@@ -102,7 +105,8 @@ export class ReputationController {
     },
   })
   @ApiOperation({
-    summary: 'RF-06.2 — Solicitar verificación adjuntando evidencias fotográficas',
+    summary:
+      'RF-06.2 — Solicitar verificación adjuntando evidencias fotográficas',
   })
   async solicitarVerificacion(
     @Body() dto: SolicitarVerificacionDto,
@@ -117,7 +121,8 @@ export class ReputationController {
   @Roles(RolUsuario.ADMINISTRADOR)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'RF-06.2 — Listar solicitudes de verificación pendientes (solo ADMIN)',
+    summary:
+      'RF-06.2 — Listar solicitudes de verificación pendientes (solo ADMIN)',
   })
   async getPendientes() {
     return this.svc.getSolicitudesPendientes();
@@ -128,13 +133,19 @@ export class ReputationController {
   @Roles(RolUsuario.ADMINISTRADOR)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'RF-06.2 — Aprobar o rechazar una solicitud de verificación (solo ADMIN)',
+    summary:
+      'RF-06.2 — Aprobar o rechazar una solicitud de verificación (solo ADMIN)',
   })
   async revisarSolicitud(
     @Param('id') id: string,
     @Body() body: { decision: 'APROBADA' | 'RECHAZADA'; notasAdmin?: string },
     @CurrentUser() user: { id: string },
   ) {
-    return this.svc.revisarSolicitud(id, body.decision, body.notasAdmin, user.id);
+    return this.svc.revisarSolicitud(
+      id,
+      body.decision,
+      body.notasAdmin,
+      user.id,
+    );
   }
 }

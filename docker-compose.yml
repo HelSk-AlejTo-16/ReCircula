@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: recircula_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: marco
+      POSTGRES_DB: ReCircula
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ReCircula"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./BackEnd
+      dockerfile: Dockerfile
+    container_name: recircula_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=marco
+      - DB_DATABASE=ReCircula
+      - JWT_SECRET=super_secret_key
+      - CORS_ORIGIN=*
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # RNF-02: Chequeo de salud del orquestador. Llama al endpoint de salud /api/v1/health.
+      # Si falla 3 veces (intervalo 10s), docker compose reiniciará o marcará el servicio como unhealthy.
+      # La política 'restart: always' asegura que la instancia caída se reemplace/reinicie automáticamente.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./FrontEnd
+      dockerfile: Dockerfile
+    container_name: recircula_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

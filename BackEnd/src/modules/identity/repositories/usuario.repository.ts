@@ -39,7 +39,7 @@ export class UsuarioRepository {
     await this.repo.manager.query(
       `INSERT INTO perfiles_reparador (usuario_id, verificado, especialidades, puntuacion, reparaciones_documentadas)
        VALUES ($1, false, '{}', 0, 0)`,
-      [usuarioId]
+      [usuarioId],
     );
   }
 }

@@ -86,7 +86,10 @@ export class NotificationsService {
         ),
       );
     } catch (err) {
-      this.logger.error('Error al crear notificación de categoría favorita', err);
+      this.logger.error(
+        'Error al crear notificación de categoría favorita',
+        err,
+      );
     }
   }
 
@@ -107,7 +110,10 @@ export class NotificationsService {
         referenciaTipo: 'transaccion',
       });
     } catch (err) {
-      this.logger.error('Error al crear notificación de calificación recibida', err);
+      this.logger.error(
+        'Error al crear notificación de calificación recibida',
+        err,
+      );
     }
   }
 
@@ -159,7 +165,9 @@ export class NotificationsService {
       await this.repo.crear({
         destinatarioId: params.reparadorId,
         // Al no existir VERIFICACION_RECHAZADA en DB, usamos VERIFICACION_APROBADA o CAMBIO_ESTADO_TRANSACCION
-        tipo: params.aprobada ? TipoNotificacion.VERIFICACION_APROBADA : TipoNotificacion.CAMBIO_ESTADO_TRANSACCION,
+        tipo: params.aprobada
+          ? TipoNotificacion.VERIFICACION_APROBADA
+          : TipoNotificacion.CAMBIO_ESTADO_TRANSACCION,
         titulo: titulo,
         mensaje: `El administrador ha ${decision} tu solicitud de verificación.${
           params.notasAdmin ? ` Motivo/Notas: ${params.notasAdmin}` : ''
@@ -182,12 +190,17 @@ export class NotificationsService {
     return { total };
   }
 
-  async marcarLeida(id: string, usuarioId: string): Promise<Notification | null> {
+  async marcarLeida(
+    id: string,
+    usuarioId: string,
+  ): Promise<Notification | null> {
     return this.repo.marcarComoLeida(id, usuarioId);
   }
 
   async marcarTodasLeidas(usuarioId: string): Promise<{ mensaje: string }> {
     await this.repo.marcarTodasComoLeidas(usuarioId);
-    return { mensaje: 'Todas las notificaciones han sido marcadas como leídas.' };
+    return {
+      mensaje: 'Todas las notificaciones han sido marcadas como leídas.',
+    };
   }
 }

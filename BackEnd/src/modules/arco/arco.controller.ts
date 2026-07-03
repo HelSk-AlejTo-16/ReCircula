@@ -1,4 +1,12 @@
-import { Controller, Get, Patch, Post, Body, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Body,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ArcoService } from './arco.service';
 import type { Request } from 'express';
@@ -12,7 +20,10 @@ export class ArcoController {
   async solicitarAcceso(@Req() req: Request) {
     const user = req.user as any;
     await this.arcoService.accesoDatos(user.id);
-    return { message: 'Tus datos han sido enviados al correo registrado en un plazo máximo de 20 días (simulado inmediatamente).' };
+    return {
+      message:
+        'Tus datos han sido enviados al correo registrado en un plazo máximo de 20 días (simulado inmediatamente).',
+    };
   }
 
   @Patch('oposicion')
@@ -22,13 +33,18 @@ export class ArcoController {
   ) {
     const user = req.user as any;
     await this.arcoService.oposicion(user.id, body.permitirMatchmaking);
-    return { message: 'Preferencias de privacidad actualizadas correctamente.' };
+    return {
+      message: 'Preferencias de privacidad actualizadas correctamente.',
+    };
   }
 
   @Post('cancelar')
   async cancelarCuenta(@Req() req: Request) {
     const user = req.user as any;
     await this.arcoService.cancelarCuenta(user.id);
-    return { message: 'Tu cuenta ha sido cancelada y tus datos anonimizados exitosamente.' };
+    return {
+      message:
+        'Tu cuenta ha sido cancelada y tus datos anonimizados exitosamente.',
+    };
   }
 }

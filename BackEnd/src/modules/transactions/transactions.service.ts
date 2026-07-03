@@ -4,10 +4,9 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TransactionsRepository } from './repositories/transactions.repository';
 import { PublicationsRepository } from '../publications/repositories/publications.repository';
-import { HistoryService } from '../history/history.service';
-import { NotificationsService } from '../notifications/notifications.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from './entities/transaction.entity';
 import {
@@ -15,14 +14,19 @@ import {
   EstadoPublicacion,
   ModalidadIntercambio,
 } from '../../common/types';
+import {
+  TransactionProposedEvent,
+  TransactionAcceptedEvent,
+  TransactionCanceledEvent,
+  TransactionCompletedEvent,
+} from '../../common/events';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private readonly repo: TransactionsRepository,
     private readonly publicationsRepo: PublicationsRepository,
-    private readonly historyService: HistoryService,
-    private readonly notificationsService: NotificationsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async proponer(
@@ -78,15 +82,17 @@ export class TransactionsService {
       notas: 'Trato propuesto',
     });
 
-    // RF-07.1 — Notificar al dueño de la publicación que hay un interesado
-    // Buscamos el nombre del iniciador para personalizar el mensaje
+    // Emitir evento de propuesta de trato (EDA)
     const txConRelaciones = await this.repo.findById(tx.id);
-    await this.notificationsService.notificarInteresEnPublicacion({
-      publicadorId: pub.publicadorId,
-      iniciadorNombre: txConRelaciones?.iniciador?.nombre ?? 'Un usuario',
-      publicacionId: pub.id,
-      tituloPublicacion: pub.titulo,
-    });
+    this.eventEmitter.emit(
+      'transaction.proposed',
+      new TransactionProposedEvent(
+        pub.publicadorId,
+        txConRelaciones?.iniciador?.nombre ?? 'Un usuario',
+        pub.id,
+        pub.titulo,
+      ),
+    );
 
     return tx;
   }
@@ -144,13 +150,11 @@ export class TransactionsService {
       notas: 'Trato aceptado, publicación reservada',
     });
 
-    // RF-07.2 — Notificar al iniciador que su trato fue aceptado
-    await this.notificationsService.notificarCambioEstadoTransaccion({
-      destinatarioId: tx.iniciadorId,
-      titulo: '¡Tu propuesta de trato fue aceptada!',
-      mensaje: `Tu propuesta ha sido aceptada. El artículo está reservado y el trato está en proceso.`,
-      transaccionId: tx.id,
-    });
+    // Emitir evento de trato aceptado (EDA)
+    this.eventEmitter.emit(
+      'transaction.accepted',
+      new TransactionAcceptedEvent(tx.iniciadorId, tx.id),
+    );
 
     return guardada;
   }
@@ -200,14 +204,13 @@ export class TransactionsService {
       notas: notas || 'Trato cancelado',
     });
 
-    // RF-07.2 — Notificar a la otra parte que el trato fue cancelado
-    const otroUsuarioId = usuarioId === tx.iniciadorId ? tx.receptorId : tx.iniciadorId;
-    await this.notificationsService.notificarCambioEstadoTransaccion({
-      destinatarioId: otroUsuarioId,
-      titulo: 'Trato cancelado',
-      mensaje: `El trato ha sido cancelado. ${notas ? `Motivo: ${notas}` : ''}`,
-      transaccionId: tx.id,
-    });
+    // Emitir evento de trato cancelado (EDA)
+    const otroUsuarioId =
+      usuarioId === tx.iniciadorId ? tx.receptorId : tx.iniciadorId;
+    this.eventEmitter.emit(
+      'transaction.canceled',
+      new TransactionCanceledEvent(otroUsuarioId, tx.id, notas),
+    );
 
     return guardada;
   }
@@ -217,7 +220,6 @@ export class TransactionsService {
     if (!tx) {
       throw new NotFoundException('Transacción no encontrada');
     }
-
 
     if (tx.iniciadorId !== usuarioId && tx.receptorId !== usuarioId) {
       throw new ForbiddenException(
@@ -250,15 +252,6 @@ export class TransactionsService {
         estado: EstadoPublicacion.INTERCAMBIADO,
       });
 
-      // Registrar en el historial del producto
-      await this.historyService.registerExchangeEntry(
-        guardada.publicacionId,
-        guardada.id,
-        `Intercambio completado bajo la modalidad ${guardada.modalidad}.`,
-        guardada.iniciadorId,
-        guardada.receptorId,
-      );
-
       // Auditoría de completada
       await this.repo.saveAuditLog({
         transaccionId: guardada.id,
@@ -268,21 +261,17 @@ export class TransactionsService {
         notas: 'Ambas partes confirmaron la recepción. Intercambio completado.',
       });
 
-      // RF-07.2 — Notificar a ambas partes que el trato fue completado
-      await Promise.all([
-        this.notificationsService.notificarCambioEstadoTransaccion({
-          destinatarioId: guardada.iniciadorId,
-          titulo: '¡Trato completado exitosamente!',
-          mensaje: `El intercambio fue confirmado por ambas partes. ¡Gracias por usar ReCircula!`,
-          transaccionId: guardada.id,
-        }),
-        this.notificationsService.notificarCambioEstadoTransaccion({
-          destinatarioId: guardada.receptorId,
-          titulo: '¡Trato completado exitosamente!',
-          mensaje: `El intercambio fue confirmado por ambas partes. ¡Gracias por usar ReCircula!`,
-          transaccionId: guardada.id,
-        }),
-      ]);
+      // Emitir evento de trato completado (EDA)
+      this.eventEmitter.emit(
+        'transaction.completed',
+        new TransactionCompletedEvent(
+          guardada.id,
+          guardada.publicacionId,
+          guardada.iniciadorId,
+          guardada.receptorId,
+          guardada.modalidad,
+        ),
+      );
     } else {
       // Auditoría de confirmación parcial (mismo estado)
       await this.repo.saveAuditLog({

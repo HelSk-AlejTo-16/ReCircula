@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { ReputationRepository, PerfilReparadorResult } from './reputation.repository';
+import {
+  ReputationRepository,
+  PerfilReparadorResult,
+} from './reputation.repository';
 import { Calificacion } from '../entities/calificacion.entity';
 import { SolicitudVerificacion } from '../entities/solicitud-verificacion.entity';
 
@@ -41,7 +44,9 @@ export class TypeOrmReputationRepository extends ReputationRepository {
 
   // ── Perfil reparador (consulta a vista v_perfil_reparadores) ───────────────
 
-  async getPerfilReparador(reparadorId: string): Promise<PerfilReparadorResult | null> {
+  async getPerfilReparador(
+    reparadorId: string,
+  ): Promise<PerfilReparadorResult | null> {
     const rows = await this.dataSource.query<PerfilReparadorResult[]>(
       `SELECT
          id                    AS "reparadorId",
@@ -75,7 +80,10 @@ export class TypeOrmReputationRepository extends ReputationRepository {
   }
 
   async findSolicitudById(id: string): Promise<SolicitudVerificacion | null> {
-    return this.solRepo.findOne({ where: { id }, relations: { reparador: true, revisadoPor: true } });
+    return this.solRepo.findOne({
+      where: { id },
+      relations: { reparador: true, revisadoPor: true },
+    });
   }
 
   async actualizarSolicitud(

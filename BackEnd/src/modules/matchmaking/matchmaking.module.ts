@@ -11,10 +11,7 @@ import { MatchmakingController } from './matchmaking.controller';
     TypeOrmModule.forFeature([PerfilReparador]),
   ],
   controllers: [MatchmakingController],
-  providers: [
-    MatchmakingRepository,
-    MatchmakingService,
-  ],
+  providers: [MatchmakingRepository, MatchmakingService],
   exports: [MatchmakingService],
 })
 export class MatchmakingModule {}

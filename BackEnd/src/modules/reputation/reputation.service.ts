@@ -5,16 +5,20 @@ import {
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ReputationRepository } from './repositories/reputation.repository';
 import { TransactionsRepository } from '../transactions/repositories/transactions.repository';
 import { CrearCalificacionDto } from './dto/crear-calificacion.dto';
 import { SolicitarVerificacionDto } from './dto/solicitar-verificacion.dto';
-import { EstadoTransaccion, EstadoVerificacion, RolUsuario } from '../../common/types';
+import { EstadoTransaccion, EstadoVerificacion } from '../../common/types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Usuario } from '../identity/entities/usuario.entity';
-import { SolicitudVerificacion } from './entities/solicitud-verificacion.entity';
-import { NotificationsService } from '../notifications/notifications.service';
+import { Usuario, RolUsuario } from '../identity/entities/usuario.entity';
+import {
+  ReputationRatingCreatedEvent,
+  ReputationVerificationRequestedEvent,
+  ReputationVerificationReviewedEvent,
+} from '../../common/events';
 
 @Injectable()
 export class ReputationService {
@@ -23,7 +27,7 @@ export class ReputationService {
     private readonly txRepo: TransactionsRepository,
     @InjectRepository(Usuario)
     private readonly usuariosRepo: Repository<Usuario>,
-    private readonly notificationsService: NotificationsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // ── RF-06.1 — Calificar contraparte ────────────────────────────────────────
@@ -70,18 +74,25 @@ export class ReputationService {
       comentario: dto.comentario ?? null,
     });
 
-    try {
-      const calificador = await this.usuariosRepo.findOne({ where: { id: calificadorId } });
-      await this.notificationsService.notificarCalificacionRecibida({
-        destinatarioId: calificadoId,
-        calificadorNombre: calificador?.nombre ?? 'Un usuario',
-        puntuacion: dto.puntuacion,
-        transaccionId: dto.transaccionId,
-      });
-    } catch (err) {
-      // Registrar error de notificación sin bloquear la respuesta de la calificación
-      console.error('Error al enviar notificación de calificación', err);
-    }
+    const emitRatingEvent = async () => {
+      try {
+        const calificador = await this.usuariosRepo.findOne({
+          where: { id: calificadorId },
+        });
+        this.eventEmitter.emit(
+          'reputation.rating_created',
+          new ReputationRatingCreatedEvent(
+            calificadoId,
+            calificador?.nombre ?? 'Un usuario',
+            dto.puntuacion,
+            dto.transaccionId,
+          ),
+        );
+      } catch (err) {
+        console.error('Error al emitir evento de calificación', err);
+      }
+    };
+    void emitRatingEvent();
 
     return calificacion;
   }
@@ -101,7 +112,8 @@ export class ReputationService {
     }
 
     // Calificaciones recientes para mostrar en el perfil
-    const calificaciones = await this.repo.getCalificacionesDeUsuario(reparadorId);
+    const calificaciones =
+      await this.repo.getCalificacionesDeUsuario(reparadorId);
 
     return { ...perfil, calificaciones };
   }
@@ -114,7 +126,9 @@ export class ReputationService {
     reparadorId: string,
   ) {
     // Solo REPARADOR_VERIFICADO puede solicitar
-    const usuario = await this.usuariosRepo.findOne({ where: { id: reparadorId } });
+    const usuario = await this.usuariosRepo.findOne({
+      where: { id: reparadorId },
+    });
     if (!usuario || usuario.rol !== RolUsuario.REPARADOR_VERIFICADO) {
       throw new ForbiddenException(
         'Solo los reparadores verificados pueden solicitar verificación',
@@ -134,10 +148,10 @@ export class ReputationService {
     });
 
     try {
-      await this.notificationsService.notificarSolicitudVerificacion({
-        reparadorNombre: usuario.nombre,
-        solicitudId: solicitud.id,
-      });
+      this.eventEmitter.emit(
+        'reputation.verification_requested',
+        new ReputationVerificationRequestedEvent(usuario.nombre, solicitud.id),
+      );
     } catch (err) {
       console.error('Error al notificar solicitud de verificación', err);
     }
@@ -178,12 +192,15 @@ export class ReputationService {
     // El ADMIN lo hará manualmente o en un sprint posterior.
 
     try {
-      await this.notificationsService.notificarVerificacionRevisada({
-        reparadorId: actualizada.reparadorId,
-        aprobada: decision === 'APROBADA',
-        notasAdmin: notasAdmin,
-        solicitudId: actualizada.id,
-      });
+      this.eventEmitter.emit(
+        'reputation.verification_reviewed',
+        new ReputationVerificationReviewedEvent(
+          actualizada.reparadorId,
+          decision === 'APROBADA',
+          notasAdmin,
+          actualizada.id,
+        ),
+      );
     } catch (err) {
       console.error('Error al notificar resultado de verificación', err);
     }

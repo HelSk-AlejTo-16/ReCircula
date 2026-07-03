@@ -142,7 +142,7 @@ export class IdentityService {
     const tHash = this.hash(token);
     console.log(`[DEBUG LOGIN] email=${usuario.email} tokenHash=${tHash}`);
     await this.registrarSesion(usuario.id, token, ip);
-    
+
     // En lugar de usar la variable '_' que enoja al linter, construimos el objeto limpio
     const datosUsuario = {
       id: usuario.id,
@@ -271,7 +271,9 @@ export class IdentityService {
       });
     } catch (err: any) {
       if (err.code === '23505') {
-        this.logger.log(`[registrarSesion] Sesión ya registrada (duplicado ignorado): ${tokenHash}`);
+        this.logger.log(
+          `[registrarSesion] Sesión ya registrada (duplicado ignorado): ${tokenHash}`,
+        );
       } else {
         throw err;
       }

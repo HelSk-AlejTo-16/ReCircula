@@ -41,29 +41,31 @@ export class MatchmakingRepository {
    * RF-03.2 — Filtros por categoría, estado de componente y modalidad.
    * Llama a fn_buscar_publicaciones() definida en el schema PostgreSQL.
    */
-  async buscarPublicaciones(dto: BuscarPublicacionesDto): Promise<ResultadoPublicacion[]> {
+  async buscarPublicaciones(
+    dto: BuscarPublicacionesDto,
+  ): Promise<ResultadoPublicacion[]> {
     const raw: any[] = await this.dataSource.query(
       `SELECT * FROM fn_buscar_publicaciones($1, $2, $3, $4, $5::modalidad_intercambio)`,
       [
         dto.latitud,
         dto.longitud,
         dto.radioKm ?? 10,
-        dto.categoria   ?? null,
-        dto.modalidad   ?? null,
+        dto.categoria ?? null,
+        dto.modalidad ?? null,
       ],
     );
 
     return raw.map((r) => ({
-      id:                    r.id,
-      titulo:                r.titulo,
-      categoria:             r.categoria,
-      modalidad:             r.modalidad,
-      precio:                r.precio !== null ? parseFloat(r.precio) : null,
-      distanciaKm:           parseFloat(r.distancia_km),
-      publicadorNombre:      r.publicador_nombre,
-      latitud:               parseFloat(r.latitud),
-      longitud:              parseFloat(r.longitud),
-      imagenPrincipal:       r.imagen_principal ?? null,
+      id: r.id,
+      titulo: r.titulo,
+      categoria: r.categoria,
+      modalidad: r.modalidad,
+      precio: r.precio !== null ? parseFloat(r.precio) : null,
+      distanciaKm: parseFloat(r.distancia_km),
+      publicadorNombre: r.publicador_nombre,
+      latitud: parseFloat(r.latitud),
+      longitud: parseFloat(r.longitud),
+      imagenPrincipal: r.imagen_principal ?? null,
     }));
   }
 
@@ -72,27 +74,24 @@ export class MatchmakingRepository {
    * especializados en esa categoría dentro del radio configurado.
    * Llama a fn_matchmaking_reparadores() definida en el schema PostgreSQL.
    */
-  async buscarReparadores(dto: MatchmakingReparadoresDto): Promise<ResultadoReparador[]> {
+  async buscarReparadores(
+    dto: MatchmakingReparadoresDto,
+  ): Promise<ResultadoReparador[]> {
     const raw: any[] = await this.dataSource.query(
       `SELECT * FROM fn_matchmaking_reparadores($1, $2, $3, $4)`,
-      [
-        dto.latitud,
-        dto.longitud,
-        dto.categoria,
-        dto.radioKm ?? 20,
-      ],
+      [dto.latitud, dto.longitud, dto.categoria, dto.radioKm ?? 20],
     );
 
     return raw.map((r) => ({
-      reparadorId:              r.reparador_id,
-      nombre:                   r.nombre,
-      nombreTaller:             r.nombre_taller ?? null,
-      especialidades:           r.especialidades ?? [],
-      puntuacion:               parseFloat(r.puntuacion),
+      reparadorId: r.reparador_id,
+      nombre: r.nombre,
+      nombreTaller: r.nombre_taller ?? null,
+      especialidades: r.especialidades ?? [],
+      puntuacion: parseFloat(r.puntuacion),
       reparacionesDocumentadas: parseInt(r.reparaciones_documentadas, 10),
-      distanciaKm:              parseFloat(r.distancia_km),
-      latitud:                  parseFloat(r.latitud),
-      longitud:                 parseFloat(r.longitud),
+      distanciaKm: parseFloat(r.distancia_km),
+      latitud: parseFloat(r.latitud),
+      longitud: parseFloat(r.longitud),
     }));
   }
 }

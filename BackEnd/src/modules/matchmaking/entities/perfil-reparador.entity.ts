@@ -1,7 +1,12 @@
 import {
-  Entity, PrimaryColumn, Column,
-  CreateDateColumn, UpdateDateColumn,
-  ManyToOne, JoinColumn, ValueTransformer,
+  Entity,
+  PrimaryColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  ValueTransformer,
 } from 'typeorm';
 import { Usuario } from '../../identity/entities/usuario.entity';
 
@@ -33,7 +38,12 @@ export class PerfilReparador {
   @JoinColumn({ name: 'usuario_id' })
   usuario: Usuario;
 
-  @Column({ name: 'nombre_taller', type: 'varchar', length: 200, nullable: true })
+  @Column({
+    name: 'nombre_taller',
+    type: 'varchar',
+    length: 200,
+    nullable: true,
+  })
   nombreTaller: string | null;
 
   @Column({ name: 'descripcion_taller', type: 'text', nullable: true })
@@ -60,7 +70,11 @@ export class PerfilReparador {
   @Column({ type: 'boolean', default: false })
   verificado: boolean;
 
-  @Column({ name: 'fecha_solicitud_verificacion', type: 'timestamptz', nullable: true })
+  @Column({
+    name: 'fecha_solicitud_verificacion',
+    type: 'timestamptz',
+    nullable: true,
+  })
   fechaSolicitudVerificacion: Date | null;
 
   @Column({ name: 'fecha_verificacion', type: 'timestamptz', nullable: true })

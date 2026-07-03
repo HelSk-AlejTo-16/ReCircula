@@ -5,17 +5,19 @@ import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import mailConfig from './config/mail.config';
 
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 // Módulos de negocio
 import { IdentityModule } from './modules/identity/identity.module';
 import { PublicationsModule } from './modules/publications/publications.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { HistoryModule } from './modules/history/history.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
-import { MatchmakingModule }    from './modules/matchmaking/matchmaking.module';
-import { ReputationModule }     from './modules/reputation/reputation.module';
-// import { HistoryModule }        from './modules/history/history.module';
-// import { NotificationsModule }  from './modules/notifications/notifications.module';
+import { MatchmakingModule } from './modules/matchmaking/matchmaking.module';
+import { ReputationModule } from './modules/reputation/reputation.module';
 import { ArcoModule } from './modules/arco/arco.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -38,6 +40,9 @@ import { ArcoModule } from './modules/arco/arco.module';
       inject: [ConfigService],
     }),
 
+    // ── Orquestador de Eventos (EDA) ─────────────────────────────────────────
+    EventEmitterModule.forRoot(),
+
     // ── RF-01: Gestión de identidad y acceso ─────────────────────────────────
     IdentityModule,
 
@@ -50,11 +55,20 @@ import { ArcoModule } from './modules/arco/arco.module';
     // ── RF-04: Gestión de transacciones e intercambios ───────────────────────
     TransactionsModule,
 
+    // ── RF-05: Historial y Auditoría ─────────────────────────────────────────
+    HistoryModule,
+
     // ── RF-06: Calificación y reputación ─────────────────────────────────────
     ReputationModule,
 
+    // ── RF-07: Notificaciones ────────────────────────────────────────────────
+    NotificationsModule,
+
     // ── RF-08: Derechos ARCO del Usuario ─────────────────────────────────────
     ArcoModule,
+
+    // ── Monitoreo y Salud ────────────────────────────────────────────────────
+    HealthModule,
   ],
 })
 export class AppModule {}

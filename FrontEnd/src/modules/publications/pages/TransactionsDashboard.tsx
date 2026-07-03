@@ -335,7 +335,12 @@ export default function TransactionsDashboard({
                         <button
                           className="btn-primary-sm"
                           disabled
-                          style={{ background: '#e5e7eb', color: '#9ca3af', borderColor: 'transparent', cursor: 'not-allowed' }}
+                          style={{
+                            background: '#e5e7eb',
+                            color: '#9ca3af',
+                            borderColor: 'transparent',
+                            cursor: 'not-allowed',
+                          }}
                         >
                           <Star size={14} fill="#9ca3af" color="#9ca3af" /> Calificado
                         </button>
@@ -362,7 +367,7 @@ export default function TransactionsDashboard({
             )
           })}
         </div>
-      )}\n
+      )}
       {/* Modal de calificación */}
       {calModal && (
         <CalificacionModal
