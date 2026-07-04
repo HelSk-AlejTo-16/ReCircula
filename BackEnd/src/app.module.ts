@@ -8,8 +8,6 @@ import jwtConfig from './config/jwt.config';
 import mailConfig from './config/mail.config';
 import { RequireHttpsMiddleware } from './common/middlewares/require-https.middleware';
 
-import { EventEmitterModule } from '@nestjs/event-emitter';
-
 // Módulos de negocio
 import { IdentityModule } from './modules/identity/identity.module';
 import { PublicationsModule } from './modules/publications/publications.module';
@@ -17,9 +15,8 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 import { HistoryModule } from './modules/history/history.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
-import { MatchmakingModule }    from './modules/matchmaking/matchmaking.module';
-import { ReputationModule }     from './modules/reputation/reputation.module';
-import { NotificationsModule }  from './modules/notifications/notifications.module';
+import { MatchmakingModule } from './modules/matchmaking/matchmaking.module';
+import { ReputationModule } from './modules/reputation/reputation.module';
 import { ArcoModule } from './modules/arco/arco.module';
 import { HealthModule } from './modules/health/health.module';
 
@@ -30,10 +27,12 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 @Module({
   imports: [
     // ── OWASP: Rate Limiting ─────────────────────────────────────────────────
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100, // 100 peticiones por minuto
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100, // 100 peticiones por minuto
+      },
+    ]),
 
     // ── Variables de entorno (.env) ──────────────────────────────────────────
     ConfigModule.forRoot({
@@ -59,9 +58,6 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
       },
       inject: [ConfigService],
     }),
-
-    // ── Orquestador de Eventos (EDA) ─────────────────────────────────────────
-    EventEmitterModule.forRoot(),
 
     // ── RF-01: Gestión de identidad y acceso ─────────────────────────────────
     IdentityModule,

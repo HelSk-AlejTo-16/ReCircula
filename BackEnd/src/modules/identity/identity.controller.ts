@@ -28,6 +28,7 @@ import { IdentityService } from './identity.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolUsuario } from './entities/usuario.entity';
 
 import { RegisterDto } from './dto/register.dto';
@@ -105,12 +106,9 @@ export class IdentityController {
     description:
       'Credenciales inválidas / email no verificado / cuenta inactiva.',
   })
-  async login(
-    @Body() dto: LoginDto,
-    @Req() req: Request,
-  ) {
+  async login(@Body() dto: LoginDto, @Req() req: Request) {
     const { usuario, token } = await this.svc.login(dto, req.ip);
-    
+
     return { usuario, token };
   }
 
