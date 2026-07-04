@@ -6,6 +6,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as express from 'express';
 import * as path from 'path';
 import compression from 'compression';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,14 +18,16 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   // ── Compresión GZIP (RNF-01) ──────────────────────────────────────────────
-  app.use(compression({
-    filter: (req, res) => {
-      if (req.headers['accept']?.includes('text/event-stream')) {
-        return false;
-      }
-      return compression.filter(req, res);
-    }
-  }));
+  app.use(
+    compression({
+      filter: (req, res) => {
+        if (req.headers['accept']?.includes('text/event-stream')) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+    }),
+  );
 
   // ── Filtros y Pipes ───────────────────────────────────────────────────────
   app.useGlobalFilters(new HttpExceptionFilter());
