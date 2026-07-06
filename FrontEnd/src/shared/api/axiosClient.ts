@@ -9,14 +9,23 @@ import axios from 'axios'
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 })
 
-// ── Request: inyecta el Bearer token si existe ───────────────────────────────
+// ── Request: Limpia cabeceras de autorización nulas si existen ────────────────
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('rc_token')
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (config.headers) {
+      const auth = config.headers.Authorization
+      if (
+        typeof auth === 'string' &&
+        (auth.includes('null') ||
+          auth.includes('undefined') ||
+          auth.includes('cookie') ||
+          auth.trim() === 'Bearer')
+      ) {
+        delete config.headers.Authorization
+      }
     }
     return config
   },
@@ -28,7 +37,6 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('rc_token')
       localStorage.removeItem('rc_user')
       // Redirige sin depender de React Router (funciona fuera de componentes)
       window.location.href = '/login'

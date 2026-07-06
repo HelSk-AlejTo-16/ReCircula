@@ -10,9 +10,7 @@ export class RequireHttpsMiddleware implements NestMiddleware {
     }
 
     // Verificar si la conexión es segura o si el proxy inverso indicó HTTPS
-    const isSecure =
-      req.secure ||
-      req.headers['x-forwarded-proto'] === 'https';
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
 
     if (!isSecure) {
       throw new ForbiddenException(

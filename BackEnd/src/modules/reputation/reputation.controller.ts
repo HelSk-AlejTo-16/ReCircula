@@ -59,7 +59,9 @@ export class ReputationController {
 
   @Public()
   @Get('calificaciones/:usuarioId')
-  @ApiOperation({ summary: 'RF-06.1 — Obtener calificaciones recibidas por un usuario' })
+  @ApiOperation({
+    summary: 'RF-06.1 — Obtener calificaciones recibidas por un usuario',
+  })
   async getCalificaciones(@Param('usuarioId') usuarioId: string) {
     return this.svc.getCalificaciones(usuarioId);
   }

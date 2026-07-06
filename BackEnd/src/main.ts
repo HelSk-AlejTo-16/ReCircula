@@ -7,12 +7,16 @@ import * as express from 'express';
 import * as path from 'path';
 import compression from 'compression';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // ── OWASP: Helmet (Cabeceras de Seguridad HSTS, XSS, etc) ───────────────
   app.use(helmet());
+
+  // ── Parser de cookies (RNF-08) ───────────────────────────────────────────
+  app.use(cookieParser());
 
   // ── Prefijo global ────────────────────────────────────────────────────────
   app.setGlobalPrefix('api/v1');
@@ -45,8 +49,12 @@ async function bootstrap() {
     express.static(path.join(process.cwd(), 'public', 'uploads')),
   );
 
-  // ── CORS ─────────────────────────────────────────────────────────────────
-  app.enableCors({ origin: process.env.CORS_ORIGIN ?? '*' });
+  // ── CORS (RNF-08) ────────────────────────────────────────────────────────
+  const corsOrigin = process.env.CORS_ORIGIN ?? '*';
+  app.enableCors({
+    origin: corsOrigin === '*' ? true : corsOrigin.split(','),
+    credentials: true,
+  });
 
   // ── Swagger / OpenAPI ─────────────────────────────────────────────────────
   const swaggerCfg = new DocumentBuilder()

@@ -17,7 +17,7 @@ export class MailService {
         pass: config.get<string>('mail.pass'),
       },
       logger: true, // Imprime la conexión en consola (demostración de seguridad)
-      debug: true,  // Imprime el handshake SMTP y TLS
+      debug: true, // Imprime el handshake SMTP y TLS
     });
   }
 
@@ -53,7 +53,11 @@ export class MailService {
 
   // ── RF-08 ───────────────────────────────────────────────────────────────
   async enviarDatosArco(to: string, usuario: any): Promise<void> {
-    await this.send(to, 'Tus datos personales (Derecho de Acceso ARCO)', this.tplDatosArco(usuario));
+    await this.send(
+      to,
+      'Tus datos personales (Derecho de Acceso ARCO)',
+      this.tplDatosArco(usuario),
+    );
   }
 
   private async send(to: string, subject: string, html: string): Promise<void> {

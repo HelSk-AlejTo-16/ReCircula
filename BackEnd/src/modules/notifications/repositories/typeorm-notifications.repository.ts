@@ -33,10 +33,10 @@ export class TypeOrmNotificationsRepository implements NotificationsRepository {
       fechaLectura: null,
     });
     const saved = await this.repo.save(notif);
-    
+
     // Emitimos el evento para SSE
     this.eventEmitter.emit('notification.created', saved);
-    
+
     return saved;
   }
 

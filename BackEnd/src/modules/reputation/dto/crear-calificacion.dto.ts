@@ -9,7 +9,9 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CrearCalificacionDto {
-  @ApiProperty({ description: 'ID de la transacción completada que se califica' })
+  @ApiProperty({
+    description: 'ID de la transacción completada que se califica',
+  })
   @IsString()
   transaccionId: string;
 

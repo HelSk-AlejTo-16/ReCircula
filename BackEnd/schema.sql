@@ -108,6 +108,7 @@ CREATE TABLE usuarios (
     email_verificado    BOOLEAN      NOT NULL DEFAULT FALSE,
     activo              BOOLEAN      NOT NULL DEFAULT TRUE,
     permitir_matchmaking BOOLEAN     NOT NULL DEFAULT TRUE,
+    acepta_transferencias_terceros BOOLEAN NOT NULL DEFAULT FALSE,
     fecha_registro      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

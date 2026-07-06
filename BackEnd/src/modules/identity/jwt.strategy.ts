@@ -22,6 +22,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
         ExtractJwt.fromUrlQueryParameter('token'),
+        (req: Request) => {
+          return req?.cookies?.['rc_token'] || null;
+        },
       ]),
       ignoreExpiration: false,
       secretOrKey: config.get<string>('jwt.secret', 'secreto-dev'),
@@ -32,10 +35,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(req: Request, payload: JwtPayload) {
     // Extraemos el token crudo para verificar en BD si fue invalidado (RF-01.5)
     let tokenPlano = '';
-    if (req.headers['authorization']) {
-      tokenPlano = req.headers['authorization'].replace('Bearer ', '');
-    } else if (req.query?.token) {
+    const authHeader = req.headers['authorization'];
+    if (
+      authHeader &&
+      !authHeader.includes('null') &&
+      !authHeader.includes('undefined') &&
+      authHeader.replace('Bearer ', '').trim() !== ''
+    ) {
+      tokenPlano = authHeader.replace('Bearer ', '');
+    } else if (
+      req.query?.token &&
+      req.query.token !== 'null' &&
+      req.query.token !== 'undefined' &&
+      (req.query.token as string).trim() !== ''
+    ) {
       tokenPlano = req.query.token as string;
+    } else if (req.cookies?.['rc_token']) {
+      tokenPlano = req.cookies['rc_token'];
     }
     const tokenHash = crypto
       .createHash('sha256')

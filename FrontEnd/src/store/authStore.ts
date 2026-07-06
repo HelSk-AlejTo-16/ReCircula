@@ -17,7 +17,7 @@ interface AuthState {
   isAuthenticated: boolean
 
   /** Guarda sesión en memoria y en localStorage */
-  setSession: (user: AuthUser, token: string) => void
+  setSession: (user: AuthUser, token?: string) => void
 
   /** Limpia sesión de memoria y localStorage */
   clearSession: () => void
@@ -34,23 +34,19 @@ const loadUser = (): AuthUser | null => {
   }
 }
 
-const loadToken = (): string | null => localStorage.getItem('rc_token')
-
 // ── Store ─────────────────────────────────────────────────────────────────────
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: loadUser(),
-  token: loadToken(),
-  isAuthenticated: Boolean(loadUser() && loadToken()),
-  setSession: (user, token) => {
+  token: loadUser() ? 'cookie' : null,
+  isAuthenticated: Boolean(loadUser()),
+  setSession: (user) => {
     localStorage.setItem('rc_user', JSON.stringify(user))
-    localStorage.setItem('rc_token', token)
-    set({ user, token, isAuthenticated: true })
+    set({ user, token: 'cookie', isAuthenticated: true })
   },
 
   clearSession: () => {
     localStorage.removeItem('rc_user')
-    localStorage.removeItem('rc_token')
     set({ user: null, token: null, isAuthenticated: false })
   },
 }))
