@@ -881,3 +881,17 @@ CREATE INDEX IF NOT EXISTS idx_notificaciones_destinatario ON notificaciones (de
 -- Índices B-Tree para optimizar auditorías y consultas de tratos/intercambios por usuario
 CREATE INDEX IF NOT EXISTS idx_transacciones_iniciador ON transacciones (iniciador_id);
 CREATE INDEX IF NOT EXISTS idx_transacciones_receptor ON transacciones (receptor_id);
+
+-- ── MÓDULO: AUDITORÍA Y BITÁCORA (LOGS DE ACCESO A DATOS PERSONALES) ──────────
+CREATE TABLE IF NOT EXISTS logs_auditoria (
+    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    usuario_id   UUID REFERENCES usuarios(id) ON DELETE SET NULL,
+    accion       VARCHAR(255) NOT NULL,
+    descripcion  TEXT,
+    ip_origen    VARCHAR(45),
+    fecha        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_logs_auditoria_usuario ON logs_auditoria (usuario_id);
+CREATE INDEX IF NOT EXISTS idx_logs_auditoria_fecha ON logs_auditoria (fecha);
+
