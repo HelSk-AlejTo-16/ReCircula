@@ -26,6 +26,13 @@ import { Usuario } from './entities/usuario.entity';
 export class IdentityService {
   private readonly logger = new Logger(IdentityService.name);
 
+  /**
+   * Patrones de Diseño Utilizados:
+   * 1. Dependency Injection (Inyección de Dependencias): NestJS se encarga de inyectar
+   *    automáticamente los servicios y repositorios requeridos a través del contenedor IoC (Inversion of Control).
+   * 2. Repository Pattern (Patrón Repositorio): Encapsula la lógica de acceso y consulta a la base de datos
+   *    abstrayendo a la capa de servicios de la tecnología ORM subyacente.
+   */
   constructor(
     private readonly usuarios: UsuarioRepository,
     private readonly sesiones: SesionRepository,
