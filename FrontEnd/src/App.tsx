@@ -10,6 +10,7 @@ import PerfilReparador from './modules/reputation/pages/PerfilReparador'
 import SolicitarVerificacion from './modules/reputation/pages/SolicitarVerificacion'
 import ArcoDashboard from './modules/identity/pages/ArcoDashboard'
 import { useAuthStore } from './store/authStore'
+import { logout } from './modules/identity/services/identity.service'
 import { NotificationBell } from './modules/notifications/components/NotificationBell'
 import {
   Plus,
@@ -74,9 +75,15 @@ function App() {
   const [longitud, setLongitud] = useState('-101.3562')
   const [radioKm, setRadioKm] = useState('15')
 
-  const handleLogout = () => {
-    clearSession()
-    window.location.href = '/login'
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (e) {
+      console.error('Error al hacer logout:', e)
+    } finally {
+      clearSession()
+      window.location.href = '/login'
+    }
   }
 
   // Obtener geolocalización cuando se activa el filtro por cercanía
