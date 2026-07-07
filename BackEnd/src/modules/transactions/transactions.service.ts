@@ -23,6 +23,13 @@ import {
 
 @Injectable()
 export class TransactionsService {
+  /**
+   * Patrones de Diseño Utilizados:
+   * 1. Dependency Injection (Inyección de Dependencias): Las dependencias del servicio se declaran
+   *    en el constructor y son provistas automáticamente por el contenedor de inversión de control (IoC) de NestJS.
+   * 2. Repository Pattern (Patrón Repositorio): Todas las operaciones de persistencia e inserción
+   *    de datos se delegan en TransactionsRepository y PublicationsRepository, aislando la lógica de negocio.
+   */
   constructor(
     private readonly repo: TransactionsRepository,
     private readonly publicationsRepo: PublicationsRepository,
