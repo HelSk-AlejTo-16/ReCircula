@@ -362,7 +362,14 @@ export default function PublicationDetails({
               <MapPin size={18} color="#2D6A4F" /> Ubicación del artículo
             </h3>
             {pub.direccionReferencia && (
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0 }}>
+              <p
+                style={{
+                  fontSize: '0.95rem',
+                  color: 'var(--text-primary)',
+                  margin: 0,
+                  wordBreak: 'break-all',
+                }}
+              >
                 <strong>Referencia:</strong> {pub.direccionReferencia}
               </p>
             )}

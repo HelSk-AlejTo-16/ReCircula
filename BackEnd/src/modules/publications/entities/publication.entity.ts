@@ -13,6 +13,7 @@ import { Usuario } from '../../identity/entities/usuario.entity';
 import { Componente } from './component.entity';
 import { ImagenPublicacion } from './image.entity';
 import { EstadoPublicacion, ModalidadIntercambio } from '../../../common/types';
+import { encrypt, decrypt } from '../../../common/utils/crypto-helper';
 
 export const pointTransformer: ValueTransformer = {
   from(value: any) {
@@ -47,6 +48,15 @@ export const pointTransformer: ValueTransformer = {
       };
     }
     return value;
+  },
+};
+
+export const cryptoTransformer: ValueTransformer = {
+  from(value: string | null): string | null {
+    return decrypt(value);
+  },
+  to(value: string | null): string | null {
+    return encrypt(value);
   },
 };
 
@@ -98,7 +108,12 @@ export class Publication {
   })
   ubicacion: { latitud: number; longitud: number };
 
-  @Column({ name: 'direccion_referencia', type: 'text', nullable: true })
+  @Column({
+    name: 'direccion_referencia',
+    type: 'text',
+    nullable: true,
+    transformer: cryptoTransformer,
+  })
   direccionReferencia: string | null;
 
   @Column({ name: 'publicador_id' })
