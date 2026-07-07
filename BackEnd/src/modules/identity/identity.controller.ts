@@ -9,9 +9,10 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Res,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -106,8 +107,19 @@ export class IdentityController {
     description:
       'Credenciales inválidas / email no verificado / cuenta inactiva.',
   })
-  async login(@Body() dto: LoginDto, @Req() req: Request) {
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { usuario, token } = await this.svc.login(dto, req.ip);
+
+    res.cookie('rc_token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matches JWT_EXPIRES_IN=7d)
+    });
 
     return { usuario, token };
   }
@@ -152,8 +164,17 @@ export class IdentityController {
       'Marca la sesión como invalidada en BD. El token queda inutilizable aunque no haya expirado.',
   })
   @ApiOkResponse({ description: 'Sesión cerrada.' })
-  logout(@Req() req: Request) {
-    const token = (req.headers['authorization'] ?? '').replace('Bearer ', '');
+  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token =
+      (req.headers['authorization'] ?? '').replace('Bearer ', '') ||
+      req.cookies?.['rc_token'];
+
+    res.clearCookie('rc_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
+
     return this.svc.logout(token);
   }
 

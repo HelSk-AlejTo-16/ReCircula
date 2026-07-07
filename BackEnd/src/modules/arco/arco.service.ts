@@ -17,7 +17,7 @@ export class ArcoService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Aquí recopilamos la información. Como es una simulación de entrega, 
+    // Aquí recopilamos la información. Como es una simulación de entrega,
     // 3. Formatear datos para la plantilla
     const datosArco = {
       nombre: usuario.nombre,

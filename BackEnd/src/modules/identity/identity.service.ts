@@ -218,11 +218,16 @@ export class IdentityService {
   // ────────────────────────────────────────────────────────────────────────────
   // RF-08  Rectificación de perfil
   // ────────────────────────────────────────────────────────────────────────────
-  async actualizarPerfil(usuarioId: string, data: { nombre?: string; email?: string }) {
+  async actualizarPerfil(
+    usuarioId: string,
+    data: { nombre?: string; email?: string },
+  ) {
     if (data.email) {
       const existe = await this.usuarios.findByEmail(data.email);
       if (existe && existe.id !== usuarioId) {
-        throw new ConflictException('El correo electrónico ya está en uso por otra cuenta.');
+        throw new ConflictException(
+          'El correo electrónico ya está en uso por otra cuenta.',
+        );
       }
     }
     await this.usuarios.actualizarPorId(usuarioId, data);

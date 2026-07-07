@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Body,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 

@@ -1,20 +1,7 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Patch,
-  UseGuards,
-  Sse,
-  MessageEvent,
-  Req,
-  Res,
-} from '@nestjs/common';
-import { Observable, fromEvent } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { Controller, Get, Param, Patch, Req, Res } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('RF-07 — Notificaciones')
@@ -28,10 +15,16 @@ export class NotificationsController {
 
   // ── RF-07 — Flujo SSE en tiempo real (Latencia <= 2s) ───────────────────────
   @Get('stream')
-  @ApiOperation({ summary: 'RF-07 — Stream en tiempo real de notificaciones (SSE)' })
-  stream(@CurrentUser() user: { id: string }, @Req() req: any, @Res() res: any) {
+  @ApiOperation({
+    summary: 'RF-07 — Stream en tiempo real de notificaciones (SSE)',
+  })
+  stream(
+    @CurrentUser() user: { id: string },
+    @Req() req: any,
+    @Res() res: any,
+  ) {
     console.log(`[SSE] Cliente conectado: ${user.id}`);
-    
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -39,21 +32,23 @@ export class NotificationsController {
     res.flushHeaders();
 
     const listener = (notif: any) => {
-      console.log(`[SSE] Evaluando notif para ${notif.destinatarioId} vs conectada: ${user.id}`);
+      console.log(
+        `[SSE] Evaluando notif para ${notif.destinatarioId} vs conectada: ${user.id}`,
+      );
       if (notif.destinatarioId === user.id) {
         console.log(`[SSE] Enviando notif a ${user.id}`);
         res.write(`data: ${JSON.stringify(notif)}\n\n`);
         if (typeof res.flush === 'function') res.flush();
       }
     };
-    
+
     this.eventEmitter.on('notification.created', listener);
-    
+
     const interval = setInterval(() => {
       res.write(`data: {"type":"ping"}\n\n`);
       if (typeof res.flush === 'function') res.flush();
     }, 15000);
-    
+
     req.on('close', () => {
       console.log(`[SSE] Cliente desconectado: ${user.id}`);
       this.eventEmitter.off('notification.created', listener);

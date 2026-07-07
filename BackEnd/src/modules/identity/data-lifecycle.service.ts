@@ -37,23 +37,29 @@ export class DataLifecycleService {
     const sesionesInvalidas = await this.sesionRepo.delete({
       invalidado: true,
     });
-    this.logger.log(`Sesiones eliminadas: ${sesionesEliminadas.affected ?? 0} expiradas, ${sesionesInvalidas.affected ?? 0} invalidadas.`);
+    this.logger.log(
+      `Sesiones eliminadas: ${sesionesEliminadas.affected ?? 0} expiradas, ${sesionesInvalidas.affected ?? 0} invalidadas.`,
+    );
 
     // 2. Eliminar tokens de recuperación expirados
     const tokensEliminados = await this.tokenRepo.delete({
       fechaExpiracion: LessThan(ahora),
     });
-    this.logger.log(`Tokens de recuperación expirados eliminados: ${tokensEliminados.affected ?? 0}.`);
+    this.logger.log(
+      `Tokens de recuperación expirados eliminados: ${tokensEliminados.affected ?? 0}.`,
+    );
 
     // 3. Eliminar cuentas no verificadas (inactivas) que tengan más de 7 días de creadas
     const hace7Dias = new Date();
     hace7Dias.setDate(ahora.getDate() - 7);
-    
+
     const usuariosEliminados = await this.usuarioRepo.delete({
       emailVerificado: false,
       fechaRegistro: LessThan(hace7Dias),
     });
-    this.logger.log(`Usuarios no verificados eliminados: ${usuariosEliminados.affected ?? 0}.`);
+    this.logger.log(
+      `Usuarios no verificados eliminados: ${usuariosEliminados.affected ?? 0}.`,
+    );
 
     this.logger.log('Limpieza de datos expirados finalizada.');
   }
