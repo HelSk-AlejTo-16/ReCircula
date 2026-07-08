@@ -264,6 +264,24 @@ function App() {
             Reparadores
           </span>
 
+          {/* Admin Dashboard: solo ADMINISTRADOR */}
+          {rol === 'ADMINISTRADOR' && (
+            <span
+              className="nav-link"
+              onClick={() => {
+                window.location.href = '/admin/dashboard'
+              }}
+              style={{
+                cursor: 'pointer',
+                color: '#9ca3af',
+                fontWeight: '600',
+                fontSize: '0.95rem',
+              }}
+            >
+              Panel Admin
+            </span>
+          )}
+
           {/* Mi Perfil: Solo para Reparadores */}
           {rol === 'REPARADOR_VERIFICADO' ? (
             <span
@@ -283,6 +301,25 @@ function App() {
               Mi Perfil
             </span>
           ) : null}
+
+          {/* Verificarse: Solo para USUARIO_GENERAL */}
+          {rol === 'USUARIO_GENERAL' && (
+            <span
+              className="nav-link"
+              onClick={() => {
+                setView('solicitar-verificacion')
+                setMenuOpen(false)
+              }}
+              style={{
+                cursor: 'pointer',
+                color: view === 'solicitar-verificacion' ? '#2D6A4F' : '#9ca3af',
+                fontWeight: '600',
+                fontSize: '0.95rem',
+              }}
+            >
+              Verificarse
+            </span>
+          )}
 
           {/* ARCO */}
           <span

@@ -16,5 +16,9 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+    headers: {
+      'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "frame-ancestors 'none'",
+    }
   },
 })
