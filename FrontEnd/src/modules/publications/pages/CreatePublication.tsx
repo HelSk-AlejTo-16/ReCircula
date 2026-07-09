@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { publicationsApi } from '../services/api'
 import { Upload, Plus, Trash2, MapPin, CheckCircle, ArrowLeft } from 'lucide-react'
+import { useAuthStore } from '../../../store/authStore'
 import './CreatePublication.css'
 
 interface ComponenteInput {
@@ -33,6 +34,7 @@ export default function CreatePublication({
   onBack?: () => void
   editId?: string
 }) {
+  const { token } = useAuthStore()
   const [titulo, setTitulo] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [categoria, setCategoria] = useState(CATEGORIAS[0])
@@ -54,7 +56,6 @@ export default function CreatePublication({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-
 
   // Cargar datos en modo edición
   useEffect(() => {
@@ -201,7 +202,7 @@ export default function CreatePublication({
             longitud: parseFloat(longitud),
           },
         }
-        await publicationsApi.updatePublication(editId, updateData, token)
+        await publicationsApi.updatePublication(editId, updateData, token || '')
       } else {
         const formData = new FormData()
         formData.append('titulo', titulo)
