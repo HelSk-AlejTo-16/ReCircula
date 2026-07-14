@@ -64,7 +64,7 @@ jobs:
           cd FrontEnd
           npm run build
 
-frontend-deploy:
+  frontend-deploy:
     name: FrontEnd Deploy (Vercel)
     needs: frontend-ci
     if: github.ref == 'refs/heads/main'
