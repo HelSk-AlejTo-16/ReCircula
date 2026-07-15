@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { XssSanitizerPipe } from './common/pipes/xss-sanitizer.pipe';
 import * as express from 'express';
 import * as path from 'path';
 import compression from 'compression';
@@ -36,6 +37,7 @@ async function bootstrap() {
   // ── Filtros y Pipes ───────────────────────────────────────────────────────
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
+    new XssSanitizerPipe(),
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,

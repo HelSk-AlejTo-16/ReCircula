@@ -142,10 +142,32 @@ export default function CreatePublication({
   const handleGetLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitud(position.coords.latitude.toFixed(6))
-          setLongitud(position.coords.longitude.toFixed(6))
+        async (position) => {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          setLatitud(lat.toFixed(6))
+          setLongitud(lng.toFixed(6))
           setError(null)
+
+          // Consumo de API externa de terceros: OpenStreetMap Nominatim (Criterio 5)
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+              {
+                headers: {
+                  'Accept-Language': 'es',
+                },
+              }
+            )
+            if (response.ok) {
+              const data = await response.json()
+              if (data && data.display_name) {
+                setDireccionReferencia(data.display_name)
+              }
+            }
+          } catch (err) {
+            console.error('Error al consumir API externa de OpenStreetMap:', err)
+          }
         },
         () => {
           setError(

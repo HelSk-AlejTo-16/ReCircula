@@ -66,6 +66,16 @@ Se configuró un pipeline en `.github/workflows/ci.yml` que se dispara automáti
 - **Pruebas Unitarias:** Ejecuta la suite de pruebas automatizadas del Backend (Jest) asegurando que no se introduzcan regresiones.
 - **Compilación (Build):** Valida que el FrontEnd en Vite compile correctamente antes de fusionar.
 
+#### 📸 Evidencias de Ejecución Exitosa (CI)
+
+A continuación se presentan las evidencias de la ejecución exitosa del pipeline de integración continua al fusionar código hacia las ramas principales:
+
+|               Estado de los Jobs (Backend & Frontend)               |                   Detalle del Workflow y Ejecución                    |
+| :-----------------------------------------------------------------: | :-------------------------------------------------------------------: |
+| ![Pipeline Status - Jobs](./docs/images/github-actions-summary.png) | ![Pipeline Status - Steps](./docs/images/github-actions-workflow.png) |
+
+_(Nota: Guarda tus capturas de pantalla en la ruta `./docs/images/github-actions-summary.png` y `./docs/images/github-actions-workflow.png` en la raíz del proyecto para que se visualicen correctamente en GitHub)._
+
 ### Despliegue Continuo (CD)
 
 - **BackEnd:** Se configuró el despliegue automático hacia **Render** conectando el repositorio de la organización. Cada fusión (_merge_) a la rama `main` compila y publica una nueva imagen Docker en producción de forma automática en:  
