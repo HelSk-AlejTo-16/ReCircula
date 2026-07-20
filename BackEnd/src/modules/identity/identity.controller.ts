@@ -117,7 +117,7 @@ export class IdentityController {
     res.cookie('rc_token', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matches JWT_EXPIRES_IN=7d)
     });
 
@@ -172,7 +172,7 @@ export class IdentityController {
     res.clearCookie('rc_token', {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
     });
 
     return this.svc.logout(token);
