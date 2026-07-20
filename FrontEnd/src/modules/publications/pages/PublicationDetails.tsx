@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { publicationsApi } from '../services/api'
 import { MapPin, Clock, Archive, ArrowLeft, Layers, Wrench } from 'lucide-react'
 import { useAuthStore } from '../../../store/authStore'
+import { CustomModal } from '../../../shared/components/CustomModal'
 import './PublicationDetails.css'
 
 interface PublicationDetailsProps {
@@ -149,29 +150,52 @@ export default function PublicationDetails({
     fetchHistory()
   }, [fetchDetail, fetchHistory])
 
-  const handleArchive = async () => {
+  const [showConfirmArchive, setShowConfirmArchive] = useState(false)
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    variant?: 'danger' | 'warning' | 'info' | 'success'
+  }>({ isOpen: false, title: '', message: '' })
+
+  const handleArchiveClick = () => {
     const activeToken =
       token || localStorage.getItem('rc_token') || localStorage.getItem('recircula_token')
     if (!activeToken) {
-      alert('Debes iniciar sesión para realizar esta acción.')
+      setAlertModal({
+        isOpen: true,
+        title: 'Sesión Requerida',
+        message: 'Debes iniciar sesión para realizar esta acción.',
+        variant: 'warning',
+      })
       return
     }
+    setShowConfirmArchive(true)
+  }
 
-    if (
-      !window.confirm(
-        '¿Estás seguro de que deseas archivar esta publicación? Ya no será visible para intercambios.'
-      )
-    ) {
-      return
-    }
+  const handleArchiveConfirm = async () => {
+    setShowConfirmArchive(false)
+    const activeToken =
+      token || localStorage.getItem('rc_token') || localStorage.getItem('recircula_token')
+    if (!activeToken) return
 
     try {
       setArchiving(true)
       await publicationsApi.archivePublication(publicationId, activeToken)
-      alert('Publicación archivada exitosamente.')
+      setAlertModal({
+        isOpen: true,
+        title: 'Éxito',
+        message: 'Publicación archivada exitosamente.',
+        variant: 'success',
+      })
       fetchDetail() // Recargar detalles para reflejar estado
     } catch (err: any) {
-      alert(err.message || 'Error al archivar la publicación')
+      setAlertModal({
+        isOpen: true,
+        title: 'Error',
+        message: err.message || 'Error al archivar la publicación',
+        variant: 'danger',
+      })
     } finally {
       setArchiving(false)
     }
@@ -574,7 +598,7 @@ export default function PublicationDetails({
               </button>
               <button
                 className="btn-secondary"
-                onClick={handleArchive}
+                onClick={handleArchiveClick}
                 disabled={archiving}
                 style={{ flex: '1' }}
               >
@@ -836,6 +860,30 @@ export default function PublicationDetails({
           </div>
         </div>
       )}
+
+      {/* Modal de Confirmación para Archivar Publicación */}
+      <CustomModal
+        isOpen={showConfirmArchive}
+        title="¿Archivar esta publicación?"
+        message="La publicación dejará de estar visible en el catálogo de intercambios. Podrás consultarla posteriormente en tu historial."
+        variant="warning"
+        confirmText="Archivar"
+        cancelText="Cancelar"
+        isLoading={archiving}
+        onConfirm={handleArchiveConfirm}
+        onCancel={() => setShowConfirmArchive(false)}
+      />
+
+      {/* Modal de Mensajes / Notificaciones Alert */}
+      <CustomModal
+        isOpen={alertModal.isOpen}
+        title={alertModal.title}
+        message={alertModal.message}
+        variant={alertModal.variant || 'info'}
+        isAlert
+        confirmText="Entendido"
+        onConfirm={() => setAlertModal({ ...alertModal, isOpen: false })}
+      />
     </div>
   )
 }

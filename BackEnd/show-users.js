@@ -32,10 +32,10 @@ async function run() {
   try {
     await client.connect();
     const res = await client.query('SELECT id, nombre, email, rol, activo, email_verificado FROM usuarios');
-    console.log('👥 USUARIOS REGISTRADOS EN LA BASE DE DATOS:');
+    console.log(' USUARIOS REGISTRADOS EN LA BASE DE DATOS:');
     console.table(res.rows);
   } catch (error) {
-    console.error('❌ Error consultando usuarios:', error);
+    console.error(' Error consultando usuarios:', error);
   } finally {
     await client.end();
   }

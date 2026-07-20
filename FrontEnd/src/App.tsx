@@ -95,9 +95,7 @@ function App() {
             setLatitud(position.coords.latitude.toString())
             setLongitud(position.coords.longitude.toString())
           },
-          (error) => {
-            console.log('Using default coordinates due to geolocation block/error:', error)
-          }
+          () => {}
         )
       }
     }
@@ -136,7 +134,8 @@ function App() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPublications()
     }
-  }, [view, fetchPublications])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, usarGeo, categoria, modalidad])
 
   const handleProximitySearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -415,7 +414,18 @@ function App() {
 
         {/* Controles de cabecera persistentes (notificaciones y menú hamburguesa) */}
         <div className="header-right-controls">
-          {token && <NotificationBell token={token} />}
+          {token && (
+            <NotificationBell
+              token={token}
+              onSelectPublication={(pubId) => {
+                setActivePublicationId(pubId)
+                setView('details')
+              }}
+              onSelectTransactions={() => {
+                setView('tratos')
+              }}
+            />
+          )}
 
           <button
             className="menu-toggle-btn"
@@ -528,32 +538,29 @@ function App() {
               </div>
 
               {usarGeo && (
-                <div className="filter-group" style={{ minWidth: '240px' }}>
+                <div
+                  className="filter-group"
+                  style={{ minWidth: '220px', paddingRight: '16px', marginRight: '8px' }}
+                >
                   <label>Radio de búsqueda: {radioKm} km</label>
                   <input
                     type="range"
                     min="5"
-                    max="500"
+                    max="50"
                     value={radioKm}
                     onChange={(e) => setRadioKm(e.target.value)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'pointer', width: '100%', marginTop: '4px' }}
                   />
-                  <span
-                    style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}
-                  >
-                    Coordenadas detectadas: {parseFloat(latitud).toFixed(4)},{' '}
-                    {parseFloat(longitud).toFixed(4)}
-                  </span>
                 </div>
               )}
 
               {usarGeo && (
-                <div className="filter-group" style={{ marginTop: 'auto' }}>
+                <div className="filter-group" style={{ minWidth: '130px', marginTop: 'auto' }}>
                   <button
                     type="submit"
                     className="btn-primary"
                     style={{
-                      padding: '12px 18px',
+                      padding: '10px 18px',
                       width: '100%',
                       height: '42px',
                       justifyContent: 'center',

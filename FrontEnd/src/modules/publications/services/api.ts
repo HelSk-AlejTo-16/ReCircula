@@ -207,7 +207,8 @@ export const matchmakingApi = {
 
     const res = await fetch(`${API_BASE_URL}/matchmaking/publicaciones?${params.toString()}`)
     if (!res.ok) {
-      throw new Error('Error al obtener publicaciones cercanas')
+      const errData = await res.json().catch(() => ({}))
+      throw new Error(errData.message || 'Error al obtener publicaciones cercanas')
     }
     return res.json()
   },

@@ -23,8 +23,6 @@ export class NotificationsController {
     @Req() req: any,
     @Res() res: any,
   ) {
-    console.log(`[SSE] Cliente conectado: ${user.id}`);
-
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -32,11 +30,7 @@ export class NotificationsController {
     res.flushHeaders();
 
     const listener = (notif: any) => {
-      console.log(
-        `[SSE] Evaluando notif para ${notif.destinatarioId} vs conectada: ${user.id}`,
-      );
       if (notif.destinatarioId === user.id) {
-        console.log(`[SSE] Enviando notif a ${user.id}`);
         res.write(`data: ${JSON.stringify(notif)}\n\n`);
         if (typeof res.flush === 'function') res.flush();
       }
@@ -50,7 +44,6 @@ export class NotificationsController {
     }, 15000);
 
     req.on('close', () => {
-      console.log(`[SSE] Cliente desconectado: ${user.id}`);
       this.eventEmitter.off('notification.created', listener);
       clearInterval(interval);
       res.end();

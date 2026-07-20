@@ -31,7 +31,7 @@ import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 20, // Limitado temporalmente a 20 para la prueba de 50 peticiones
+        limit: 100, // Límite de 100 peticiones por minuto
       },
     ]),
 

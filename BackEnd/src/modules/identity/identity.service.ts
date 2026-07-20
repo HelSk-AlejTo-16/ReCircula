@@ -147,8 +147,6 @@ export class IdentityService {
       );
 
     const token = this.firmarToken(usuario);
-    const tHash = this.hash(token);
-    console.log(`[DEBUG LOGIN] email=${usuario.email} tokenHash=${tHash}`);
     await this.registrarSesion(usuario.id, token, ip);
 
     // En lugar de usar la variable '_' que enoja al linter, construimos el objeto limpio
