@@ -8,6 +8,8 @@ interface Props {
   onMarkAsRead: (id: string) => void
   onMarkAllAsRead: () => void
   onClose: () => void
+  onSelectPublication?: (id: string) => void
+  onSelectTransactions?: () => void
 }
 
 function tipoIcono(tipo: Notificacion['tipo']): string {
@@ -47,6 +49,8 @@ export const NotificationPanel: React.FC<Props> = ({
   onMarkAsRead,
   onMarkAllAsRead,
   onClose,
+  onSelectPublication,
+  onSelectTransactions,
 }) => {
   const navigate = useNavigate()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -65,10 +69,25 @@ export const NotificationPanel: React.FC<Props> = ({
   const handleClick = (notif: Notificacion) => {
     if (!notif.leida) onMarkAsRead(notif.id)
     if (notif.referenciaTipo === 'publicacion' && notif.referenciaId) {
-      navigate(`/publications/${notif.referenciaId}`)
+      if (onSelectPublication) {
+        onSelectPublication(notif.referenciaId)
+      } else {
+        navigate(`/publications/${notif.referenciaId}`)
+      }
       onClose()
-    } else if (notif.referenciaTipo === 'transaccion' && notif.referenciaId) {
-      navigate(`/transactions`)
+    } else if (notif.referenciaTipo === 'transaccion') {
+      if (onSelectTransactions) {
+        onSelectTransactions()
+      } else {
+        navigate('/transactions')
+      }
+      onClose()
+    } else if (notif.referenciaTipo === 'calificacion') {
+      if (onSelectTransactions) {
+        onSelectTransactions()
+      }
+      onClose()
+    } else {
       onClose()
     }
   }

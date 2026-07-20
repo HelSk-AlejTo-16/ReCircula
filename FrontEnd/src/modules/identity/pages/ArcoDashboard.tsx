@@ -4,6 +4,7 @@ import { Shield, Download, FileEdit, UserX, AlertTriangle, EyeOff, Loader2 } fro
 import { useAuthStore } from '../../../store/authStore'
 import { arcoService } from '../services/arco.service'
 import { updateProfile } from '../services/identity.service'
+import { CustomModal } from '../../../shared/components/CustomModal'
 
 export default function ArcoDashboard() {
   const { token, user, setSession, clearSession } = useAuthStore()
@@ -18,6 +19,11 @@ export default function ArcoDashboard() {
   // Asumimos true por defecto, o false si no existe la propiedad.
   // En un entorno real el user object tendría user.permitirMatchmaking desde el backend.
   const [permitirMatchmaking, setPermitirMatchmaking] = useState(true)
+  const [showConfirmCancelacion, setShowConfirmCancelacion] = useState(false)
+  const [showSuccessAlert, setShowSuccessAlert] = useState<{ isOpen: boolean; msg: string }>({
+    isOpen: false,
+    msg: '',
+  })
 
   if (!user || !token) return null
 
@@ -71,23 +77,27 @@ export default function ArcoDashboard() {
     }
   }
 
-  const handleCancelacion = async () => {
-    const confirm = window.confirm(
-      '🚨 ATENCIÓN: Esta acción es IRREVERSIBLE. Se eliminará tu cuenta y tus datos personales serán anonimizados de forma permanente. ¿Estás absolutamente seguro de continuar?'
-    )
-    if (!confirm) return
+  const handleCancelacion = () => {
+    setShowConfirmCancelacion(true)
+  }
 
+  const ejecutarCancelacion = async () => {
+    setShowConfirmCancelacion(false)
     setLoadingCancelacion(true)
     setMensaje(null)
     try {
       const res = await arcoService.cancelarCuenta(token)
-      alert(res.message)
-      clearSession() // Fuerza el cierre de sesión porque la cuenta ya no es válida
-      window.location.href = '/'
+      setShowSuccessAlert({ isOpen: true, msg: res.message })
     } catch (err: any) {
       setMensaje({ texto: err.message, tipo: 'error' })
       setLoadingCancelacion(false)
     }
+  }
+
+  const handleSuccessClose = () => {
+    setShowSuccessAlert({ isOpen: false, msg: '' })
+    clearSession()
+    window.location.href = '/'
   }
 
   return (
@@ -302,8 +312,21 @@ export default function ArcoDashboard() {
             identificables (nombre, correo) serán anonimizados de nuestros registros
             permanentemente.
           </p>
-          <div style={{ backgroundColor: '#fca5a5', padding: '10px', borderRadius: '8px', marginBottom: '1rem', color: '#7f1d1d', fontSize: '0.85rem' }}>
-            <strong>Ciclo de Vida de los Datos:</strong> Como parte de nuestra política estricta de conservación, si decides no borrar tu cuenta, el sistema cuenta con procesos programados automáticos que anonimizan los datos de usuarios inactivos o no verificados una vez que cumplen su finalidad, protegiendo así la integridad de la base de datos sin retener información innecesaria.
+          <div
+            style={{
+              backgroundColor: '#fca5a5',
+              padding: '10px',
+              borderRadius: '8px',
+              marginBottom: '1rem',
+              color: '#7f1d1d',
+              fontSize: '0.85rem',
+            }}
+          >
+            <strong>Ciclo de Vida de los Datos:</strong> Como parte de nuestra política estricta de
+            conservación, si decides no borrar tu cuenta, el sistema cuenta con procesos programados
+            automáticos que anonimizan los datos de usuarios inactivos o no verificados una vez que
+            cumplen su finalidad, protegiendo así la integridad de la base de datos sin retener
+            información innecesaria.
           </div>
           <button
             onClick={handleCancelacion}
@@ -331,6 +354,30 @@ export default function ArcoDashboard() {
           </button>
         </div>
       </div>
+
+      {/* Modal de Confirmación de Cancelación de Cuenta */}
+      <CustomModal
+        isOpen={showConfirmCancelacion}
+        title="¿Eliminar cuenta permanentemente?"
+        message="Esta acción es IRREVERSIBLE. Se eliminará tu cuenta y tus datos personales serán anonimizados de forma permanente de la plataforma ReCircula."
+        variant="danger"
+        confirmText="Sí, eliminar cuenta"
+        cancelText="Cancelar"
+        isLoading={loadingCancelacion}
+        onConfirm={ejecutarCancelacion}
+        onCancel={() => setShowConfirmCancelacion(false)}
+      />
+
+      {/* Modal de Éxito al Eliminar Cuenta */}
+      <CustomModal
+        isOpen={showSuccessAlert.isOpen}
+        title="Cuenta Eliminada"
+        message={showSuccessAlert.msg}
+        variant="success"
+        isAlert
+        confirmText="Entendido"
+        onConfirm={handleSuccessClose}
+      />
     </div>
   )
 }

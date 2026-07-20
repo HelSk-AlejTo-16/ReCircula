@@ -41,7 +41,7 @@ export default function MatchmakingReparadores({ onVerPerfil }: Props) {
           setLatitud(position.coords.latitude.toString())
           setLongitud(position.coords.longitude.toString())
         },
-        (err) => console.log('Geolocation error/blocked:', err)
+        () => {}
       )
     }
   }, [])
@@ -101,24 +101,27 @@ export default function MatchmakingReparadores({ onVerPerfil }: Props) {
             </select>
           </div>
 
-          <div className="filter-group">
+          <div
+            className="filter-group"
+            style={{ minWidth: '220px', paddingRight: '16px', marginRight: '8px' }}
+          >
             <label>Radio de búsqueda: {radioKm} km</label>
             <input
               type="range"
               min="5"
-              max="100"
+              max="50"
               value={radioKm}
               onChange={(e) => setRadioKm(e.target.value)}
-              style={{ cursor: 'pointer', marginTop: '10px' }}
+              style={{ cursor: 'pointer', marginTop: '10px', width: '100%' }}
             />
           </div>
 
-          <div className="filter-group" style={{ marginTop: 'auto' }}>
+          <div className="filter-group" style={{ minWidth: '130px', marginTop: 'auto' }}>
             <button
               type="submit"
               className="btn-primary"
               style={{
-                padding: '12px 18px',
+                padding: '10px 18px',
                 width: '100%',
                 height: '42px',
                 justifyContent: 'center',

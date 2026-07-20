@@ -5,9 +5,15 @@ import './NotificationBell.css'
 
 interface Props {
   token: string | null
+  onSelectPublication?: (id: string) => void
+  onSelectTransactions?: () => void
 }
 
-export const NotificationBell: React.FC<Props> = ({ token }) => {
+export const NotificationBell: React.FC<Props> = ({
+  token,
+  onSelectPublication,
+  onSelectTransactions,
+}) => {
   const [open, setOpen] = useState(false)
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(token)
 
@@ -46,6 +52,8 @@ export const NotificationBell: React.FC<Props> = ({ token }) => {
           onMarkAsRead={markAsRead}
           onMarkAllAsRead={markAllAsRead}
           onClose={() => setOpen(false)}
+          onSelectPublication={onSelectPublication}
+          onSelectTransactions={onSelectTransactions}
         />
       )}
     </div>
